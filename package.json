@@ -1,0 +1,146 @@
+{
+  "name": "react-concurrent-router",
+  "version": "1.0.0",
+  "description": "Performant routing embracing React concurrent UI patterns",
+  "author": "Santino Puleio",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "unpkg": "dist/umd/react-concurrent-router.production.min.js",
+  "scripts": {
+    "build": "rimraf dist && npm run build:cjs&& npm run build:esm && npm run build:umd && npm run build:pick",
+    "build:cjs": "cross-env BABEL_ENV=cjs rollup -c",
+    "build:esm": "cross-env BABEL_ENV=esm rollup -c",
+    "build:umd": "cross-env BABEL_ENV=umd rollup -c",
+    "build:pick": "cherry-pick --cjs-dir cjs --esm-dir esm --cwd dist ../src",
+    "postbuild:pick": "rimraf dist/utils dist/createRouter dist/RouterContext rmdir",
+    "format": "prettier-standard 'src/**/*.js'",
+    "test": "jest --watch",
+    "testonly": "jest --runInBand --verbose && bundlesize",
+    "coverage": "jest --coverage",
+    "postcoverage": "open-cli ./coverage/lcov-report/index.html",
+    "prebundlesize": "npm run build",
+    "bundlesize": "bundlesize",
+    "cleanupminified": "rimraf dist/cjs/index.min.js dist/esm/index.min.js",
+    "precommit": "npm run format",
+    "prepublishOnly": "npm run testonly && npm run cleanupminified",
+    "prepush": "npm run testonly"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/santino/react-concurrent-router.git"
+  },
+  "bugs": {
+    "url": "https://github.com/santino/react-concurrent-router/issues"
+  },
+  "homepage": "https://github.com/santino/react-concurrent-router",
+  "keywords": [
+    "react",
+    "router",
+    "concurrent",
+    "route",
+    "routing",
+    "preloading",
+    "prefetching",
+    "history",
+    "relay"
+  ],
+  "bundlesize": [
+    {
+      "path": "./dist/cjs/index.min.js",
+      "maxSize": "7 Kb",
+      "compression": "none"
+    },
+    {
+      "path": "./dist/cjs/index.min.js",
+      "maxSize": "3 Kb"
+    },
+    {
+      "path": "./dist/esm/index.min.js",
+      "maxSize": "7 Kb",
+      "compression": "none"
+    },
+    {
+      "path": "./dist/esm/index.min.js",
+      "maxSize": "3 Kb"
+    },
+    {
+      "path": "./dist/umd/react-concurrent-router.production.min.js",
+      "maxSize": "14 Kb",
+      "compression": "none"
+    },
+    {
+      "path": "./dist/umd/react-concurrent-router.production.min.js",
+      "maxSize": "5 Kb"
+    }
+  ],
+  "publishConfig": {
+    "directory": "dist"
+  },
+  "standard": {
+    "parser": "babel-eslint",
+    "ignore": [
+      "/dist/"
+    ],
+    "env": [
+      "jest"
+    ]
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**"
+    ]
+  },
+  "lint-staged": {
+    "linters": {
+      "*.js": [
+        "prettier-standard",
+        "git add"
+      ]
+    }
+  },
+  "dependencies": {
+    "history": "^5.0.0"
+  },
+  "devDependencies": {
+    "@ampproject/rollup-plugin-closure-compiler": "^0.26.0",
+    "@babel/core": "^7.10.2",
+    "@babel/plugin-proposal-object-rest-spread": "^7.10.4",
+    "@babel/plugin-transform-object-assign": "^7.10.4",
+    "@babel/plugin-transform-react-constant-elements": "^7.10.4",
+    "@babel/plugin-transform-runtime": "^7.10.4",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/preset-react": "^7.10.1",
+    "@rollup/plugin-babel": "^5.0.4",
+    "@rollup/plugin-commonjs": "^13.0.0",
+    "@rollup/plugin-node-resolve": "^8.1.0",
+    "@testing-library/dom": "^7.20.0",
+    "@testing-library/jest-dom": "^5.10.1",
+    "@testing-library/react": "^10.3.0",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^26.0.1",
+    "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "bundlesize": "^0.18.0",
+    "cherry-pick": "^0.5.0",
+    "cross-env": "^7.0.2",
+    "jest": "^26.0.1",
+    "lint-staged": "^10.2.10",
+    "open-cli": "^6.0.1",
+    "prettier-standard": "^16.3.0",
+    "prop-types": "^15.7.2",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.16.1",
+    "rollup-plugin-terser": "^6.1.0",
+    "standard": "^14.3.4"
+  },
+  "peerDependencies": {
+    "@babel/runtime": "^7.4.4",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  }
+}
