@@ -1,15 +1,12 @@
 {
   "name": "react-concurrent-router",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Performant routing embracing React concurrent UI patterns",
   "author": "Santino Puleio",
   "license": "MIT",
-  "files": [
-    "dist"
-  ],
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "unpkg": "dist/umd/react-concurrent-router.production.min.js",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "unpkg": "umd/react-concurrent-router.production.min.js",
   "scripts": {
     "build": "rimraf dist && npm run build:cjs&& npm run build:esm && npm run build:umd && npm run build:pick",
     "build:cjs": "cross-env BABEL_ENV=cjs rollup -c",
@@ -22,12 +19,13 @@
     "testonly": "jest --runInBand --verbose && bundlesize",
     "coverage": "jest --coverage",
     "postcoverage": "open-cli ./coverage/lcov-report/index.html",
-    "prebundlesize": "npm run build",
     "bundlesize": "bundlesize",
-    "cleanupminified": "rimraf dist/cjs/index.min.js dist/esm/index.min.js",
     "precommit": "npm run format",
-    "prepublishOnly": "npm run testonly && npm run cleanupminified",
-    "prepush": "npm run testonly"
+    "prepush": "npm run testonly",
+    "cleanupminified": "rimraf dist/cjs/index.min.js dist/esm/index.min.js",
+    "copydistfiles": "cp -rf package.json LICENCE README.md dist",
+    "predistpublish": "npm run build && npm run testonly && npm run cleanupminified && npm run copydistfiles",
+    "distpublish": "cd dist && npm publish"
   },
   "repository": {
     "type": "git",
