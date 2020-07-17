@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+  - stable
+  - lts/*
+
+cache:
+  yarn: true
+  npm: true
+
+language: node_js
+ 
+node_js:
+  - stable
+ 
+install:
+  - npm install
+ 
+script:
+  - npm run build && npm run coverage && bundlesize
+
+after_script:
+  - COVERALLS_REPO_TOKEN=$coveralls_repo_token npm run coveralls
