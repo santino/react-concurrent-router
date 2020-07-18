@@ -1,3 +1,5 @@
+[![licence](https://badgen.net/github/license/santino/react-concurrent-router)](https://github.com/santino/react-concurrent-router/blob/master/LICENCE) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![npm version](https://badgen.net/npm/v/react-concurrent-router)](https://www.npmjs.com/package/react-concurrent-router) [![Build Status](https://travis-ci.com/santino/react-concurrent-router.svg?branch=master)](https://travis-ci.com/santino/react-concurrent-router) [![Coverage Status](https://coveralls.io/repos/github/santino/react-concurrent-router/badge.svg?branch=master)](https://coveralls.io/github/santino/react-concurrent-router)
+
 # react-concurrent-router (RCR)
 
 Performant routing embracing React [Concurrent UI patterns](https://it.reactjs.org/docs/concurrent-mode-patterns.html)
@@ -22,8 +24,8 @@ Those are not the only features addressing keyboard navigation, in fact combined
 #### More info on performance
 There is a lot to share in terms of the performance tricks built into this router, so I'm planning to build a more detailed documentation. In the meantime here are some bullet points:
 - Route js chunks are cached so they can be hot-retrieved and not incur into multiple loading; which would otherwise be a concern when using Webpack dynamic imports asynchronous API
-- Differently from other popular routers, the routes are flatten to allow direct matches with an O(1) complexity (when not using named params) rather than iterating through all the routes available to perform a match; hence O(n)
-- Routes are defined as an array of objects **only**. This is because I consider using React components to define routes inappropriate, given that routes are simple config objects that have no reason to go through the life and rendering cycles of React components which are meant to work with DOM nodes. An important part of the philosophy for this library is that performance comes before cosmetic embellishments. You might not know that when using a `<Route>` component from other routing libraries they most likely need to use React Children API underhood in order to iterate through your routes and compute their props in order to end up with an array of objects anyway. Dealing with this task requires extra computation during initialisaton, which impacts resources of your users machine and delays the router setup until the whole React library is loaded; not to mention the extra code required, hence impact on bundle size too
+- Differently from other popular routers, the routes are flattened to allow direct matches with an O(1) complexity (when not using named params) rather than iterating through all the routes available to perform a match; hence O(n)
+- Routes are defined as an array of objects **only**. This is because I consider using React components to define routes inappropriate, given that routes are simple config objects that have no reason to go through the life and rendering cycles of React components which are meant to work with DOM nodes. An important part of the philosophy for this library is that performance comes before cosmetic embellishments. You might not know that when using a `<Route>` component from other routing libraries they most likely need to use React Children API underhood in order to iterate through your routes and compute their props in order to end up with an array of objects anyway. Dealing with this task requires extra computation during initialisation, which impacts resources of your users machine and delays the router setup until the whole React library is loaded; not to mention the extra code required, hence impact on bundle size too
 - [Map Objects](https://developer.mozilla.org/it/docs/Web/JavaScript/Reference/Global_Objects/Map) are used extensively by the router since they provide much better performance compared to standard javascript arrays
 - The library output is optimised for bullet-proof tree-shaking so you can always be sure that you will be importing only the bits you actually use. RCR won't just rely on your Webpack setup, because it comes already code-splitted
 - The overall bundle size is just below 3kb gzipped. Realistically when combined with tree-shaking and code splitting in your own application, you will generate optimised chunks with the bits you actually need, where you need them; reducing the actual footprint impact even further
@@ -51,13 +53,13 @@ import createBrowserRouter from 'react-concurrent-router/createBrowserRouter'
 const routes = [
   {
     path: '/',
-    component: () => import('src/pages/Home'),
+    component: () => import('./pages/Home'),
     prefetch: () => ({ popularProducts: fetch('https://.../api/fetchPopularProducts') }),
     children: [
-      { path: 'login', component: () => import('src/pages/LoginPage') },
-      { path: 'account', component: () => import('src/pages/AccountPage'), children: [ ... ] },
-      { path: 'contacts', component: () => import('src/pages/ContactsPage') },
-      { path: '*', component: () => import('src/pages/NotFoundPage') }
+      { path: 'login', component: () => import('./pages/LoginPage') },
+      { path: 'account', component: () => import('./pages/AccountPage'), children: [ ... ] },
+      { path: 'contacts', component: () => import('./pages/ContactsPage') },
+      { path: '*', component: () => import('./pages/NotFoundPage') }
     ]
   }
 ]
@@ -69,14 +71,14 @@ export default router
 import React, { Suspense } from 'react'
 import RouterProvider from 'react-concurrent-router/RouterProvider'
 import RouteRenderer from 'react-concurrent-router/RouteRenderer'
-import ErrorBoundary from 'src/ErrorBoundary'
-import router from 'src/router'
+import ErrorBoundary from './ErrorBoundary'
+import router from './router'
 
 <ThemeProvider theme={theme}> {/* just an example, given you probably have other providers */}
   <RouterProvider router={router}>
     <ErrorBoundary>
       <Suspense fallback={'Loading fallback...'}>
-        <RouteRenderer /> {/* this will render your components */}
+        <RouteRenderer /> {/* this renders your route components */}
       </Suspense>
     </ErrorBoundary>
   </RouterProvider>
@@ -143,19 +145,23 @@ Let's share some extra detail about these router config properties:
 
 ## Routes configuration
 ```js
+// src/router.js
+
 const routes = [
   {
     path: '/',
-    component: () => import('src/components/pages/Home'),
+    component: () => import('./pages/Home'),
     prefetch: () => ({ popularProducts: fetch('/api/fetchPopularProducts') }),
     children: [
-      { path: 'login', component: () => import('src/components/pages/LoginPage') },
-      { path: 'account', component: () => import('src/components/pages/AccountPage'), children: [ ... ] },
-      { path: 'contacts', component: () => import('src/components/pages/ContactsPage') },
-      { path: '*', component: () => import('src/components/pages/NotFoundPage') }
+      { path: 'login', component: () => import('./pages/LoginPage') },
+      { path: 'account', component: () => import('./pages/AccountPage'), children: [ ... ] },
+      { path: 'contacts', component: () => import('./pages/ContactsPage') },
+      { path: '*', component: () => import('./pages/NotFoundPage') }
     ]
   }
 ]
+
+...
 ```
 Routes is just an array of objects. Each route can have a children property which will create a new branch of sub-routes and so its value must also be an array of objects. You can nest down as much as you need.  
 If you believe that having a plain object of deep nested routes could become hard to read, hence why a JSX syntax might be preferred by some: think creative! You can always break your routes into separate arrays of objects that represent different branches.  
@@ -184,7 +190,7 @@ RCR makes this as simple as setting one or two booleans to true.
 import createBrowserRouter from 'react-concurrent-router/createBrowserRouter'
 
 const routes = [ /* routes objects */ ]
-const router = createMemoryRouter({
+const router = createBrowserRouter({
   routes,
   awaitComponent: true, // keep current route and hold new route rendering until component code is loaded
   awaitPrefetch: true // keep current route and hold new route rendering until component data prefetch completes
@@ -196,9 +202,9 @@ export default router
 import React, { Suspense } from 'react'
 import RouterProvider from 'react-concurrent-router/RouterProvider'
 import RouteRenderer from 'react-concurrent-router/RouteRenderer'
-import ErrorBoundary from 'src/ErrorBoundary'
-import router from 'src/router'
-import PendingIndicator from 'src/PendingIndicator'
+import ErrorBoundary from './ErrorBoundary'
+import router from './router'
+import PendingIndicator from './PendingIndicator'
 
 <RouterProvider router={router}>
   <ErrorBoundary>
@@ -509,20 +515,22 @@ The hook takes an object as the only argument and accepts the following three pr
 
 RCR let you setup redirect rules within your route configuration; let's look at an example:
 ```js
+// src/router.js
+
 const routes = [
   {
     path: '/',
-    component: () => import('src/components/pages/Home'),
+    component: () => import('./pages/Home'),
     children: [
       {
         path: 'login',
-        component: () => import('src/components/pages/Login'),
+        component: () => import('./pages/Login'),
         redirectRules: () => (isUserLoggedIn() ? '/account' : null)
       },
       {
         path: 'account',
         redirectRules: () => (isUserLoggedIn() ? null : '/login'),
-        component: () => import('src/components/pages/Account'),
+        component: () => import('./pages/Account'),
         children: [ /* more `/account` children routes */ ]
       }
       ... // more `/` children routes
@@ -530,6 +538,7 @@ const routes = [
   }
 ]
 
+...
 ```
 In this case when attempting navigation to the login page we might want to check if the user has already logged in and redirect straight away to the `/account` page; vice-versa if the user attempts to navigate to the `/account` page when they not yet logged in, we can redirect them to the login page.  
 This is useful because it will prevent rendering a page that will be of no use to your users or, even worse, if you would end up rendering an empty `/account` page with a message like "it seems you did not log in yet; please head to the `/login` page"; causing more rendering and painting jobs on the browser, not to mention the extra user interactions required to finally get where they should be.  
@@ -544,24 +553,26 @@ The key point is that the return value of the function must be a string that rep
 Group routes are simply parent routes which properties will be merged into their children, including deeply nested children.  
 The key point is that a group route doesn't have a `component` property. The main use case for this is probably related to redirectRules, so we can build on top of the example above.
 ```js
+// src/router.js
+
 const routes = [
   {
     path: '/',
-    component: () => import('src/components/pages/Home'),
+    component: () => import('./pages/Home'),
     children: [
       ... // other routes, including /login
       {
         path: 'account', // this is our group route; notice lack of 'component' property
         redirectRules: () => (isUserLoggedIn() ? null : '/login'),
         children: [
-          { component: () => import('src/components/pages/Account') },
+          { component: () => import('./pages/Account') },
           {
             path: 'orders',
-            component: () => import('src/components/pages/AccountOrders'),
+            component: () => import('./pages/AccountOrders'),
             children: [
               {
                 path: ':orderId',
-                component: () => import('src/components/pages/AccountOrder'),
+                component: () => import('./pages/AccountOrder'),
                 children: [ /* more `/account/orders/:orderId` children routes */ ]
               }
             ]
@@ -572,34 +583,38 @@ const routes = [
     ]
   }
 ]
+
+...
 ```
-Notice how our `path: 'account'` route is considered a group route because it doesn't have a `component` property. The first children, instead, only has a component property that will inherit all the props from its parent, effectively becoming equivalent to declaring the route like so `{ path: 'account', redirectRules: () => { /* ... */ }, component: () => import('src/components/pages/Account') }`.  
+Notice how our `path: 'account'` route is considered a group route because it doesn't have a `component` property. The first children, instead, only has a component property that will inherit all the props from its parent, effectively becoming equivalent to declaring the route like so `{ path: 'account', redirectRules: () => { /* ... */ }, component: () => import('./pages/Account') }`.  
 With this setup what we want to achieve is to apply our logic to redirect users to `/login` on any route nested from the `/account` branch; in this case this rule will apply to `/account`, `/account/orders`, `/account/orders/:orderId` and all the nested children of this last one.  
 This is hopefully very convenient, however do you have all the freedom to override in whichever way you want.
-For example if you want to override redirectRules on a single route only, you can achieve this like so: `{ path: ':orderId', redirectRules: () => { /* custom logic only for this path */ }, component: () => import('src/components/pages/AccountOrder') }`. In this case you will be overriding redirectRules only for the path you defined the property but not its children; these would still execute the redirect function defined in the `/account` group route, which in this case is `redirectRules: () => (isUserLoggedIn() ? null : '/login')`.
+For example if you want to override redirectRules on a single route only, you can achieve this like so: `{ path: ':orderId', redirectRules: () => { /* custom logic only for this path */ }, component: () => import('./pages/AccountOrder') }`. In this case you will be overriding redirectRules only for the path you defined the property but not its children; these would still execute the redirect function defined in the `/account` group route, which in this case is `redirectRules: () => (isUserLoggedIn() ? null : '/login')`.
 If you do, instead, want to override redirect rules for a branch of routes you should simply declare a new group route, like so:
 ```js
+// src/router.js
+
 const routes = [
   {
     path: '/',
-    component: () => import('src/components/pages/Home'),
+    component: () => import('./pages/Home'),
     children: [
       ... // other routes, including /login
       {
         path: 'account', // main group route
         redirectRules: () => (isUserLoggedIn() ? null : '/login'),
         children: [
-          { component: () => import('src/components/pages/Account') },
+          { component: () => import('./pages/Account') },
           ... // other routes that will inherit above redirectRules
           {
             path: 'orders',
-            component: () => import('src/components/pages/AccountOrders'),
+            component: () => import('./pages/AccountOrders'),
             children: [
               {
                 path: ':orderId',  // new group route (no component property)
                 redirectRules: () => { /* custom logic for all /account/orders/:oderId children */ },
                 children: [
-                  { component: () => import('src/components/pages/AccountOrder') },
+                  { component: () => import('./pages/AccountOrder') },
                   ... // more `/account/orders/:orderId` children routes
                 ]
               }
@@ -612,33 +627,36 @@ const routes = [
   }
 ]
 
+...
 ```
 In this case the redirectRules defined in `/account` will be applied to `/account` and `/account/orders` pages; but `/account/orders/orderId` and all its children as well as nested children will, instead apply redirectRules defined in `/account/orders/orderId`.
 
 You can see how we can take it even further from here. Clearly so far we've only been talking about overriding rules; but what if, for convenience, you want to setup a group route because you want to cascade redirectRules to a number of children, but ultimately there is a nested branch of routes that shouldn't have any redirect rule at all?  
 The answer is simple: declare a group route without any redirect rule:
 ```js
+// src/router.js
+
 const routes = [
   {
     path: '/',
-    component: () => import('src/components/pages/Home'),
+    component: () => import('./pages/Home'),
     children: [
       ... // other routes, including /login
       {
         path: 'account', // first group route
         redirectRules: () => (isUserLoggedIn() ? null : '/login'),
         children: [
-          { component: () => import('src/components/pages/Account') },
+          { component: () => import('./pages/Account') },
           ... // other routes that will inherit above redirectRules
           {
             path: 'orders',
-            component: () => import('src/components/pages/AccountOrders'),
+            component: () => import('./pages/AccountOrders'),
             children: [
               {
                 path: ':orderId', // new group route (no component property)
                 // no redirectRules here!
                 children: [
-                  { component: () => import('src/components/pages/AccountOrder') },
+                  { component: () => import('./pages/AccountOrder') },
                   ... // more `/account/orders/:orderId` children routes
                 ]
               }
@@ -650,6 +668,8 @@ const routes = [
     ]
   }
 ]
+
+...
 ```
 
 ## Custom Suspendable resources
@@ -676,6 +696,8 @@ const routes = [
     ]
   }
 ]
+
+...
 
 // src/pages/Issue.js
 import React, { useMemo, Suspense } from 'react'
@@ -771,7 +793,7 @@ import router from './router'
   <RouterProvider router={router}>
     <ErrorBoundary>
       <Suspense fallback={'Loading fallback...'}>
-        <RouteRenderer /> // this will render your components
+        <RouteRenderer /> {/* this renders your route components */}
       </Suspense>
     </ErrorBoundary>
   </RouterProvider>
