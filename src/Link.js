@@ -2,21 +2,18 @@ import React, { useCallback, useContext } from 'react'
 import PropTypes from 'prop-types'
 import RouterContext from './RouterContext'
 
+const shouldNavigate = event =>
+  !event.defaultPrevented && // default prevented would indicate a custom handled event
+  event.button === 0 && // we want to action only left mouse clicks
+  (!event.target.target || event.target.target === '_self') && // let browser natively handle targets other than "_self"
+  !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // let browser natively handle new window/tab, download and context menu
+
 const Link = React.forwardRef(
   ({ activeClassName, exact, target, to, onClick, ...props }, ref) => {
     const { isActive, preloadCode, warmRoute, history } = useContext(
       RouterContext
     )
     const toIsActive = isActive(to, exact)
-
-    const shouldNavigate = useCallback(
-      event =>
-        !event.defaultPrevented && // default prevented would indicate a custom handled event
-        event.button === 0 && // we want to action only left mouse clicks
-        (!event.target.target || event.target.target === '_self') && // let browser natively handle targets other than "_self"
-        !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey), // let browser natively handle new window/tab, download and context menu
-      []
-    )
 
     // handle navigation to new route
     const handleClick = useCallback(
@@ -27,7 +24,7 @@ const Link = React.forwardRef(
         event.preventDefault()
 
         // if we are already in the destination URL, mimic behaviour of standard anchor
-        // and replace location instead of pushing it; to not create new entry in history
+        // and replace location instead of pushing; to not create new entry in history
         const navigationMethod = isActive(to, true) ? 'replace' : 'push'
 
         history[navigationMethod](to)
@@ -48,10 +45,11 @@ const Link = React.forwardRef(
       ({ type, key, code, keyCode }) => {
         if (
           type === 'mousedown' ||
-          (type === 'keydown' && key === 'Enter') ||
-          (type === 'keydown' && code === 'Enter') ||
-          (type === 'keydown' && code === 'NumpadEnter') ||
-          (type === 'keydown' && keyCode === 13)
+          (type === 'keydown' &&
+            (key === 'Enter' ||
+              code === 'Enter' ||
+              code === 'NumpadEnter' ||
+              keyCode === 13))
         ) {
           warmRoute(to)
         }
