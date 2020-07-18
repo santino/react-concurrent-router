@@ -3,19 +3,23 @@ node_js:
   - stable
   - lts/*
 
+install:
+  - npm install
+
+script: skip # skip default test script which would run in watch mode
+
 jobs:
   include:
     - stage: test plus coverage
       script: npm run coverage
-    - stage: coverall report
-      script: COVERALLS_REPO_TOKEN=$coveralls_repo_token npm run coveralls
-    - stage: build bundle
+      after_script:
+        - COVERALLS_REPO_TOKEN=$coveralls_repo_token npm run coveralls
+    - stage: bundle build plus size check
       script: npm run build
-    - stage: check bundle size
-      script: bundlesize
+      after_script:
+        - bundlesize
     - stage: publish package
       if: tag IS present
-      node_js: "stable"
       script: npm run build
       after_script:
         - npm run cleanupminified
@@ -26,6 +30,7 @@ jobs:
         provider: npm
         email: $NPM_AUTH_EMAIL
         api_key: $NPM_AUTH_TOKEN
+        skip_cleanup: true
         on:
           tags: true
           branch: master
