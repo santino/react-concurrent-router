@@ -20,13 +20,12 @@
     "coverage": "jest --coverage",
     "postcoverage": "open-cli ./coverage/lcov-report/index.html",
     "coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls",
+    "prebundlesize": "npm run build",
     "bundlesize": "bundlesize",
     "precommit": "npm run format",
     "prepush": "npm run testonly",
     "cleanupminified": "rimraf dist/cjs/index.min.js dist/esm/index.min.js",
-    "copydistfiles": "cp -rf package.json LICENCE README.md dist",
-    "predistpublish": "npm run build && npm run testonly && npm run cleanupminified && npm run copydistfiles",
-    "distpublish": "cd dist && npm publish"
+    "copydistfiles": "cp -rf package.json LICENCE README.md dist"
   },
   "repository": {
     "type": "git",

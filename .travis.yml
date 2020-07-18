@@ -3,20 +3,29 @@ node_js:
   - stable
   - lts/*
 
-cache:
-  yarn: true
-  npm: true
-
-language: node_js
- 
-node_js:
-  - stable
- 
-install:
-  - npm install
- 
-script:
-  - npm run build && npm run coverage && bundlesize
-
-after_script:
-  - COVERALLS_REPO_TOKEN=$coveralls_repo_token npm run coveralls
+jobs:
+  include:
+    - stage: test plus coverage
+      script: npm run coverage
+    - stage: coverall report
+      script: COVERALLS_REPO_TOKEN=$coveralls_repo_token npm run coveralls
+    - stage: build bundle
+      script: npm run build
+    - stage: check bundle size
+      script: bundlesize
+    - stage: publish package
+      if: tag IS present
+      node_js: "stable"
+      script: npm run build
+      after_script:
+        - npm run cleanupminified
+        - npm run copydistfiles
+      before_deploy:
+        - cd dist
+      deploy:
+        provider: npm
+        email: $NPM_AUTH_EMAIL
+        api_key: $NPM_AUTH_TOKEN
+        on:
+          tags: true
+          branch: master
