@@ -1,8 +1,36 @@
 [![licence](https://badgen.net/github/license/santino/react-concurrent-router)](https://github.com/santino/react-concurrent-router/blob/master/LICENCE) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![npm version](https://badgen.net/npm/v/react-concurrent-router)](https://www.npmjs.com/package/react-concurrent-router) [![Build Status](https://travis-ci.com/santino/react-concurrent-router.svg?branch=master)](https://travis-ci.com/santino/react-concurrent-router) [![Coverage Status](https://coveralls.io/repos/github/santino/react-concurrent-router/badge.svg?branch=master)](https://coveralls.io/github/santino/react-concurrent-router)
 
 # react-concurrent-router (RCR)
-
 Performant routing embracing React [Concurrent UI patterns](https://it.reactjs.org/docs/concurrent-mode-patterns.html)
+
+#### Table of Contents
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Overview](#overview)
+    - [Accessibility](#accessibility)
+    - [More info on performance](#more-info-on-performance)
+- [Example applications](#example-applications)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Router configuration](#router-configuration)
+- [Routes configuration](#routes-configuration)
+- [Suspense boundaries alternative](#suspense-boundaries-alternative)
+- [Link navigation](#link-navigation)
+- [Data prefetching](#data-prefetching)
+    - [Prefetching when in full control of the fetching mechanism](#prefetching-when-in-full-control-of-the-fetching-mechanism)
+- [Hooks](#hooks)
+  - [useRouter](#userouter)
+  - [useNavigation](#usenavigation)
+  - [useHistory](#usehistory)
+  - [useBeforeRouteLeave](#usebeforerouteleave)
+- [Redirect rules](#redirect-rules)
+- [Group routes](#group-routes)
+- [Building custom Suspendable resources](#building-custom-suspendable-resources)
+- [Usage with Relay](#usage-with-relay)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Overview
 React Concurrent Router is a lightweight router for React applications with a main focus on performance and user experience.
@@ -544,7 +572,7 @@ In this case when attempting navigation to the login page we might want to check
 This is useful because it will prevent rendering a page that will be of no use to your users or, even worse, if you would end up rendering an empty `/account` page with a message like "it seems you did not log in yet; please head to the `/login` page"; causing more rendering and painting jobs on the browser, not to mention the extra user interactions required to finally get where they should be.  
 Another **key reason why this feature is so important** on RCR brings us back to preloading. You know, by now, that RCR preloads the code to render your pages when "mouse-overing" a link; when you configure redirect rules in your route, RCR will also check if your logic would push the user to a different route so that it can eventually preload the code for the final destination only; once again another trick aimed at performance and UX 😉
 
-#### Ok, but what are redirect rules, how do I take advantage of them?
+**Ok, but what are redirect rules and how do I take advantage of them?**  
 Redirect rules is just a function, in your route you add a `redirectRules` property which value is a function that executes any code you require to perform the logic to determine whether or not you want to redirect users to a different route.  
 The key point is that the return value of the function must be a string that represents the new path you want to redirect to. Alternatively if following your logic you determine you do not wish to perform any redirect, you should return a negative value; I certainly suggest using declarative `null`.  
 > ProTip: RCR will pass route params to your redirectRules function so you can use them when performing your logic. For instance if your path has query params such as `/myPath?foo=bar`, or named params like `/users/:userId` you can use them respectively in redirectRules in the following way: `redirectRules: ({ foo }) => { /* your logic here */ }` and `redirectRules: ({ userId }) => { /* your logic here */ }`
@@ -672,7 +700,7 @@ const routes = [
 ...
 ```
 
-## Custom Suspendable resources
+## Building custom Suspendable resources
 One more bonus point, aimed at great customisation and usability, is the exported class that lets you create your own "Suspendable resources".  
 As you know, by now, the router transforms automatically your components code into resources that can "suspend", the same applies to prefetch requests when opting into `assistPrefetch`; this ultimately offers native integration with React Suspense.
 

@@ -22,7 +22,7 @@
     "coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls",
     "prebundlesize": "npm run build",
     "bundlesize": "bundlesize",
-    "precommit": "npm run format",
+    "precommit": "lint-staged",
     "prepush": "npm run testonly",
     "cleanupminified": "rimraf dist/cjs/index.min.js dist/esm/index.min.js",
     "copydistfiles": "cp -rf package.json LICENCE README.md dist"
@@ -93,12 +93,8 @@
     ]
   },
   "lint-staged": {
-    "linters": {
-      "*.js": [
-        "prettier-standard",
-        "git add"
-      ]
-    }
+    "*js": ["prettier-standard --lint"],
+    "./README.md": "doctoc"
   },
   "dependencies": {
     "history": "^5.0.0"
@@ -125,6 +121,7 @@
     "cherry-pick": "^0.5.0",
     "coveralls": "^3.1.0",
     "cross-env": "^7.0.2",
+    "doctoc": "^1.4.0",
     "jest": "^26.0.1",
     "lint-staged": "^10.2.10",
     "open-cli": "^6.0.1",
