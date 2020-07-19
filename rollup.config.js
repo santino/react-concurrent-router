@@ -61,6 +61,7 @@ const bundles = {
         dir: 'dist/cjs',
         entryFileNames: '[name].js',
         format: 'cjs',
+        exports: 'default',
         esModule: false
       },
       external: configBase.external,

@@ -27,7 +27,7 @@ export const sortAndStringifyRequestParams = params => {
 
   // for ... in loop is faster than Object.keys + map
   for (const param in params) {
-    /* istanbul ignore next */
+    // istanbul ignore next
     if (!Object.prototype.hasOwnProperty.call(params, param)) continue
 
     optimisedParamsArray.push({
@@ -135,12 +135,18 @@ export const routesToMap = routes => {
 }
 
 /**
+ * Transforms input to location object when string; returns non-parsed input otherwise.
+ */
+const pathToLocation = location =>
+  typeof location === 'string' ? parsePath(location) : location
+
+/**
  * Check match between two different locations. Check for equal pathname by default.
  * Will also compare search and hash properties for exact match.
  */
 export const locationsMatch = (left, right, exact = false) => {
-  const leftLocation = typeof left === 'string' ? parsePath(left) : left
-  const rightLocation = typeof right === 'string' ? parsePath(right) : right
+  const leftLocation = pathToLocation(left)
+  const rightLocation = pathToLocation(right)
 
   // pathname equality is always required, even for non-exact matches
   if (leftLocation.pathname !== rightLocation.pathname) return false
@@ -191,10 +197,7 @@ export const matchRegexRoute = (referencePath, pathname) => {
  * Will return matched route; wildrcard route (404) if no matches or ultimately null if no wildcard set.
  */
 export const matchRoutes = (routes, requestedMatch) => {
-  const locationToMatch =
-    typeof requestedMatch === 'string'
-      ? parsePath(requestedMatch)
-      : requestedMatch
+  const locationToMatch = pathToLocation(requestedMatch)
   const { pathname } = locationToMatch
   const params = { ...paramsStringToObject(locationToMatch.search) }
 
@@ -256,7 +259,7 @@ const prepareAssistPrefetchMatch = (
 
   // for ... in loop is faster than Object.keys + map
   for (const property in prefetch) {
-    /* istanbul ignore next */
+    // istanbul ignore next
     if (!Object.prototype.hasOwnProperty.call(prefetch, property)) {
       continue
     }

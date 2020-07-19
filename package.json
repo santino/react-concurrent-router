@@ -7,6 +7,7 @@
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "unpkg": "umd/react-concurrent-router.production.min.js",
+  "sideEffects": false,
   "scripts": {
     "build": "rimraf dist && npm run build:cjs&& npm run build:esm && npm run build:umd && npm run build:pick",
     "build:cjs": "cross-env BABEL_ENV=cjs rollup -c",
