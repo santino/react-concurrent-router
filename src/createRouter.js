@@ -43,21 +43,22 @@ const createRouter = ({
     subscribers.forEach(callback => callback(nextEntry))
   })
 
-  // The actual object that will be passed to the RouterProvider
-  const context = {
+  // The context object that will be passed to the RouterProvider
+  return {
     assistPrefetch,
     awaitComponent,
     history,
-    isActive: (path, exact) => locationsMatch(history.location, path, exact),
+    isActive: (path, { exact } = {}) =>
+      locationsMatch(history.location, path, exact),
     get: () => currentEntry,
-    preloadCode: pathname => {
+    preloadCode: path => {
       // preload just the code for a route
-      const { route } = matchRoutes(routesMap, pathname)
+      const { route } = matchRoutes(routesMap, path)
       route.component.load()
     },
-    warmRoute: pathname => {
+    warmRoute: path => {
       // preload both code and prefetch data for a route
-      const match = matchRoutes(routesMap, pathname)
+      const match = matchRoutes(routesMap, path)
       prepareMatch(match, assistPrefetch, awaitPrefetch)
     },
     subscribe: callback => {
@@ -69,8 +70,6 @@ const createRouter = ({
       return dispose
     }
   }
-
-  return context
 }
 
 export default createRouter

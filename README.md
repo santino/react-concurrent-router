@@ -127,7 +127,7 @@ React Concurrent Router allow you to create three different routers aimed at dif
 
 When creating a router you pass a single object argument, the only mandatory property is an array of routes. However each router can also take optional config properties.
 ```js
-const rcrConfigOptions: {
+const rcrConfigOptions = {
   routes: [ ... ], // mandatory array of objects with routes definition
   awaitComponent: true, // Suspense alternaive to hold new route rendering until component code is loaded
   assistPrefetch: true, // used when we are in full control of fetching mechanism
@@ -443,7 +443,7 @@ import useRouter from 'react-concurrent-router/useRouter'
 
 const MyComponent = () => {
   const { isActive, preloadCode, warmRoute } = useRouter()
-  const isActiveRoot = isActive('/', false)
+  const isActiveRoot = isActive('/', { exact: false })
 
   if ( ... ) preloadCode('/support') // load javascript code for support page
   if ( ... ) warmRoute('/home') // load code and prefetch data for home page
@@ -454,7 +454,7 @@ const MyComponent = () => {
 }
 ```
 This hook exposes some of the methods defined by the router which are used internally to provide core functionalities. It returns an object with the following properties:
-- `isActive`: a function that checks if a given path matches the current location. It takes two arguments: `path`, either a string or a [location object](https://developer.mozilla.org/en-US/docs/Web/API/Location), and `exact`, a boolean to indicate whether or not we want to perform an exact match; hence also compare query and hash params. Internally this is used by the link component to attach an active class when the link matches the current route
+- `isActive`: a function that checks if a given path matches the current location. It takes two arguments. The first, `path`, is either a string or a [location object](https://developer.mozilla.org/en-US/docs/Web/API/Location). The second argument, `options`, is an object to set matching options; currently only `exact` option is supported, which is a boolean to indicate whether or not we want to perform an exact match; hence also compare query and hash params. Internally, `isActive`, is used by the link component to attach an active class when the link matches the current route
 - `preloadCode`: a function that preloads just the code for a given path and stores the result in memory; this function will not trigger any additional network request after the first one is made; since promises/results are already available in memory. Takes just one argument, `path`, which could either be a string or a [location object](https://developer.mozilla.org/en-US/docs/Web/API/Location). This could be useful when you know you will be performing programmatic navigation and so you want to preload the code for the route you will navigate to. E.g. when the user is filling a login form and you know you will then push to the `/account` page, you can preload the code for `/account` before navigating to it; for example when the user click the login form submit button; or maybe even when they start filling the form
 - `warmRoute`: given a path, this function triggers both code preloading and data prefetching (if coupled to the destination route), both jobs will not incur in additional requests if promises/results are already available in memory. Like the above, it takes just one argument, `path`, which could either be a string or a [location object](https://developer.mozilla.org/en-US/docs/Web/API/Location). Similarly to the above this could be useful when performing programmatic navigation. For example in an eCommerce website we might want to redirect to the home page after a successful login; the home page requires a data fetch to display the latest products added to the inventory; this method allows us to preload the code for the home page component as well as prefetch the latest products data even before the user actually submits the form
 

@@ -13,7 +13,7 @@ const Link = React.forwardRef(
     const { isActive, preloadCode, warmRoute, history } = useContext(
       RouterContext
     )
-    const toIsActive = isActive(to, exact)
+    const toIsActive = isActive(to, { exact })
 
     // handle navigation to new route
     const handleClick = useCallback(
@@ -25,7 +25,9 @@ const Link = React.forwardRef(
 
         // if we are already in the destination URL, mimic behaviour of standard anchor
         // and replace location instead of pushing; to not create new entry in history
-        const navigationMethod = isActive(to, true) ? 'replace' : 'push'
+        const navigationMethod = isActive(to, { exact: true })
+          ? 'replace'
+          : 'push'
 
         history[navigationMethod](to)
       },

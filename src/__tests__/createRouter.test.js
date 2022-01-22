@@ -115,7 +115,7 @@ describe('createRouter', () => {
       )
 
       locationsMatch.mockClear()
-      router.isActive('customPath2', false)
+      router.isActive('customPath2', { exact: false })
       expect(locationsMatch).toHaveBeenCalledTimes(1)
       expect(locationsMatch).toHaveBeenCalledWith(
         defaultProps.history.location,
@@ -124,7 +124,7 @@ describe('createRouter', () => {
       )
 
       locationsMatch.mockClear()
-      router.isActive('customPath2', true)
+      router.isActive('customPath2', { exact: true })
       expect(locationsMatch).toHaveBeenCalledTimes(1)
       expect(locationsMatch).toHaveBeenCalledWith(
         defaultProps.history.location,

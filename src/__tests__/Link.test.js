@@ -82,7 +82,7 @@ describe('Link', () => {
       const link = wrap().getByRole('link')
 
       expect(router.isActive).toHaveBeenCalledTimes(1)
-      expect(router.isActive).toHaveBeenCalledWith('/test', false)
+      expect(router.isActive).toHaveBeenCalledWith('/test', { exact: false })
 
       expect(link).not.toHaveClass()
       expect(link).not.toHaveAttribute('aria-current')
@@ -93,7 +93,7 @@ describe('Link', () => {
       const link = wrap().getByRole('link')
 
       expect(router.isActive).toHaveBeenCalledTimes(1)
-      expect(router.isActive).toHaveBeenCalledWith('/test', false)
+      expect(router.isActive).toHaveBeenCalledWith('/test', { exact: false })
 
       expect(link).toHaveClass('active')
       expect(link).toHaveAttribute('aria-current', 'page')

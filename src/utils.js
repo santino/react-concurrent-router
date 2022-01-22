@@ -198,8 +198,8 @@ export const matchRegexRoute = (referencePath, pathname) => {
  */
 export const matchRoutes = (routes, requestedMatch) => {
   const locationToMatch = pathToLocation(requestedMatch)
-  const { pathname } = locationToMatch
-  const params = { ...paramsStringToObject(locationToMatch.search) }
+  const { pathname, search } = locationToMatch
+  const params = { ...paramsStringToObject(search) }
 
   // try a direct match, which works on routes with query params whilst keeping complexity to O(1)
   let matchedRoute = routes.has(pathname) && routes.get(pathname)
