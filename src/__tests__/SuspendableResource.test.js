@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import SuspendableResource from '../SuspendableResource'
 
 describe('SuspendableResource', () => {
@@ -82,7 +86,7 @@ describe('SuspendableResource', () => {
       }
       mockLoader.mockImplementationOnce(
         () =>
-          new Promise((resolve) => {
+          new Promise(resolve => {
             setTimeout(() => {
               resolve(mockModule)
             }, 500)
@@ -105,7 +109,7 @@ describe('SuspendableResource', () => {
       }
       mockLoader.mockImplementationOnce(
         () =>
-          new Promise((resolve) => {
+          new Promise(resolve => {
             setTimeout(() => {
               resolve(mockModule)
             }, 500)

@@ -8,6 +8,10 @@
   "module": "esm/index.js",
   "unpkg": "umd/react-concurrent-router.production.min.js",
   "sideEffects": false,
+  "engines": {
+    "node": "^16.12.0",
+    "npm": "^8.1.0"
+  },
   "scripts": {
     "build": "rimraf dist && npm run build:cjs&& npm run build:esm && npm run build:umd && npm run build:pick",
     "build:cjs": "cross-env BABEL_ENV=cjs rollup -c",
@@ -50,7 +54,7 @@
   "bundlesize": [
     {
       "path": "./dist/cjs/index.min.js",
-      "maxSize": "7 Kb",
+      "maxSize": "7.5 Kb",
       "compression": "none"
     },
     {
@@ -68,12 +72,12 @@
     },
     {
       "path": "./dist/umd/react-concurrent-router.production.min.js",
-      "maxSize": "14 Kb",
+      "maxSize": "14.5 Kb",
       "compression": "none"
     },
     {
       "path": "./dist/umd/react-concurrent-router.production.min.js",
-      "maxSize": "5 Kb"
+      "maxSize": "5.5 Kb"
     }
   ],
   "publishConfig": {
@@ -94,49 +98,55 @@
     ]
   },
   "lint-staged": {
-    "*js": ["prettier-standard --lint"],
+    "*js": [
+      "prettier-standard --lint"
+    ],
     "./README.md": "doctoc"
   },
   "dependencies": {
-    "history": "^5.0.0"
+    "history": "^5.2.0"
   },
   "devDependencies": {
-    "@ampproject/rollup-plugin-closure-compiler": "^0.26.0",
-    "@babel/core": "^7.10.2",
-    "@babel/plugin-proposal-object-rest-spread": "^7.10.4",
-    "@babel/plugin-transform-object-assign": "^7.10.4",
-    "@babel/plugin-transform-react-constant-elements": "^7.10.4",
-    "@babel/plugin-transform-runtime": "^7.10.4",
-    "@babel/preset-env": "^7.10.2",
-    "@babel/preset-react": "^7.10.1",
-    "@rollup/plugin-babel": "^5.0.4",
-    "@rollup/plugin-commonjs": "^13.0.0",
-    "@rollup/plugin-node-resolve": "^8.1.0",
-    "@testing-library/dom": "^7.20.0",
-    "@testing-library/jest-dom": "^5.10.1",
-    "@testing-library/react": "^10.3.0",
+    "@ampproject/rollup-plugin-closure-compiler": "^0.27.0",
+    "@babel/core": "^7.16.10",
+    "@babel/plugin-proposal-object-rest-spread": "^7.16.7",
+    "@babel/plugin-transform-object-assign": "^7.16.7",
+    "@babel/plugin-transform-react-constant-elements": "^7.16.7",
+    "@babel/plugin-transform-runtime": "^7.16.10",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.16.7",
+    "@babel/runtime": "^7.16.7",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "@testing-library/dom": "^8.11.2",
+    "@testing-library/jest-dom": "^5.16.1",
+    "@testing-library/react": "^12.1.2",
+    "@types/react": "^17.0.38",
     "babel-eslint": "^10.1.0",
-    "babel-jest": "^26.0.1",
+    "babel-jest": "^27.4.6",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
-    "bundlesize": "^0.18.0",
+    "bundlesize": "^0.18.1",
     "cherry-pick": "^0.5.0",
-    "coveralls": "^3.1.0",
-    "cross-env": "^7.0.2",
-    "doctoc": "^1.4.0",
-    "jest": "^26.0.1",
-    "lint-staged": "^10.2.10",
-    "open-cli": "^6.0.1",
+    "coveralls": "^3.1.1",
+    "cross-env": "^7.0.3",
+    "doctoc": "^2.1.0",
+    "dtslint": "^4.2.1",
+    "jest": "^27.4.7",
+    "lint-staged": "^12.2.2",
+    "open-cli": "^7.0.1",
     "prettier-standard": "^16.3.0",
-    "prop-types": "^15.7.2",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "prop-types": "^15.8.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "rimraf": "^3.0.2",
-    "rollup": "^2.16.1",
-    "rollup-plugin-terser": "^6.1.0",
-    "standard": "^14.3.4"
+    "rollup": "^2.65.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "standard": "^16.0.4",
+    "typescript": "^4.5.5"
   },
   "peerDependencies": {
-    "@babel/runtime": "^7.4.4",
+    "@babel/runtime": "^7.11.0",
     "react": "^16.8.0",
     "react-dom": "^16.8.0"
   }
