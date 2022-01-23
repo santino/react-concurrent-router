@@ -40,6 +40,8 @@ jobs:
         node-version: [16.x, 17.x]
 
     steps:
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Cache Yarn
@@ -53,7 +55,10 @@ jobs:
           ${{ runner.os }}-
     - name: Install Dependencies using Yarn
       run: yarn install --ignore-engines && git checkout yarn.lock
-    - run: yarn coverage
+    - name: Run tests plus coverage
+      run: yarn coverage
+    - name: Track coverage
+      run: yarn coveralls
 
   build-plus-sizecheck:
     needs: setup
