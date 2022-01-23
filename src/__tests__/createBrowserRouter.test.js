@@ -8,7 +8,7 @@ jest.mock('../createRouter')
 createBrowserHistory.mockReturnValue('BrowserHistory')
 
 describe('createBrowserRouter', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks()
   })
 

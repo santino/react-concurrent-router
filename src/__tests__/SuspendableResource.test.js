@@ -14,7 +14,7 @@ describe('SuspendableResource', () => {
       })
   )
 
-  afterEach(() => {
+  beforeEach(() => {
     mockLoader.mockClear()
   })
 

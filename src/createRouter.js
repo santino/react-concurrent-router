@@ -51,14 +51,14 @@ const createRouter = ({
     isActive: (path, { exact } = {}) =>
       locationsMatch(history.location, path, exact),
     get: () => currentEntry,
-    preloadCode: path => {
+    preloadCode: (path, { ignoreRedirectRules } = {}) => {
       // preload just the code for a route
-      const { route } = matchRoutes(routesMap, path)
+      const { route } = matchRoutes(routesMap, path, ignoreRedirectRules)
       route.component.load()
     },
-    warmRoute: path => {
+    warmRoute: (path, { ignoreRedirectRules } = {}) => {
       // preload both code and prefetch data for a route
-      const match = matchRoutes(routesMap, path)
+      const match = matchRoutes(routesMap, path, ignoreRedirectRules)
       prepareMatch(match, assistPrefetch, awaitPrefetch)
     },
     subscribe: callback => {

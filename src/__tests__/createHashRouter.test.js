@@ -8,7 +8,7 @@ jest.mock('../createRouter')
 createHashHistory.mockReturnValue('HashHistory')
 
 describe('createHashRouter', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks()
   })
 

@@ -27,7 +27,7 @@ const wrap = (props = {}) =>
   )
 
 describe('useBeforeRouteLeave', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks()
   })
 

@@ -68,7 +68,7 @@
     },
     {
       "path": "./dist/esm/index.min.js",
-      "maxSize": "3 Kb"
+      "maxSize": "3.5 Kb"
     },
     {
       "path": "./dist/umd/react-concurrent-router.production.min.js",

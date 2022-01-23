@@ -34,7 +34,7 @@ const defaultProps = {
 }
 
 describe('createRouter', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks()
   })
 
@@ -153,7 +153,23 @@ describe('createRouter', () => {
       expect(matchRoutes).toHaveBeenCalledTimes(2)
       expect(matchRoutes).toHaveBeenLastCalledWith(
         'routesMap',
-        'customPathname'
+        'customPathname',
+        undefined
+      )
+      expect(mockComponent.load).toHaveBeenCalledTimes(1)
+      expect(mockComponent.load).toHaveBeenCalledWith()
+    })
+
+    it('behaves as expected when invoking "preloadCode" function with "ignoreRedirectRules" option', () => {
+      const router = createRouter(defaultProps)
+
+      router.preloadCode('customPathname', { ignoreRedirectRules: true })
+
+      expect(matchRoutes).toHaveBeenCalledTimes(2)
+      expect(matchRoutes).toHaveBeenLastCalledWith(
+        'routesMap',
+        'customPathname',
+        true
       )
       expect(mockComponent.load).toHaveBeenCalledTimes(1)
       expect(mockComponent.load).toHaveBeenCalledWith()
@@ -166,7 +182,34 @@ describe('createRouter', () => {
       router.warmRoute('routePathname')
 
       expect(matchRoutes).toHaveBeenCalledTimes(2)
-      expect(matchRoutes).toHaveBeenLastCalledWith('routesMap', 'routePathname')
+      expect(matchRoutes).toHaveBeenLastCalledWith(
+        'routesMap',
+        'routePathname',
+        undefined
+      )
+      expect(prepareMatch).toHaveBeenCalledTimes(1)
+      expect(prepareMatch).toHaveBeenCalledWith(
+        {
+          location: 'matchedLocation',
+          route: { component: mockComponent }
+        },
+        defaultProps.assistPrefetch,
+        defaultProps.awaitPrefetch
+      )
+    })
+
+    it('behaves as expected when invoking "warmRoute" function with "ignoreRedirectRules" option', () => {
+      const router = createRouter(defaultProps)
+
+      prepareMatch.mockClear()
+      router.warmRoute('routePathname', { ignoreRedirectRules: true })
+
+      expect(matchRoutes).toHaveBeenCalledTimes(2)
+      expect(matchRoutes).toHaveBeenLastCalledWith(
+        'routesMap',
+        'routePathname',
+        true
+      )
       expect(prepareMatch).toHaveBeenCalledTimes(1)
       expect(prepareMatch).toHaveBeenCalledWith(
         {

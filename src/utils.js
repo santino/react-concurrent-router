@@ -196,7 +196,11 @@ export const matchRegexRoute = (referencePath, pathname) => {
  * Oterwise loop through all the routes, hence O(n), to perform full match with Regex pattern.
  * Will return matched route; wildrcard route (404) if no matches or ultimately null if no wildcard set.
  */
-export const matchRoutes = (routes, requestedMatch) => {
+export const matchRoutes = (
+  routes,
+  requestedMatch,
+  ignoreRedirectRules = false
+) => {
   const locationToMatch = pathToLocation(requestedMatch)
   const { pathname, search } = locationToMatch
   const params = { ...paramsStringToObject(search) }
@@ -229,7 +233,9 @@ export const matchRoutes = (routes, requestedMatch) => {
   // in which case we have to start over to match the redirected route
   // otherwise we compose and return the matched entry
   const redirectPath =
-    matchedRoute.redirectRules && matchedRoute.redirectRules(params)
+    !ignoreRedirectRules &&
+    matchedRoute.redirectRules &&
+    matchedRoute.redirectRules(params)
   return redirectPath
     ? matchRoutes(routes, redirectPath)
     : { route: matchedRoute, params, location: locationToMatch }

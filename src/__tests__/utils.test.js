@@ -19,6 +19,10 @@ jest.mock('../SuspendableResource', () =>
 )
 
 describe('utils', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   describe('getCanonicalPath', () => {
     it('returns passed argument when it starts with "/"', () => {
       expect(getCanonicalPath('/')).toBe('/')
@@ -117,9 +121,6 @@ describe('utils', () => {
 
     beforeAll(() => {
       console.warn = jest.fn()
-    })
-    afterEach(() => {
-      console.warn.mockClear()
     })
     afterAll(() => {
       console.warn = originalWarn
@@ -1125,6 +1126,19 @@ describe('utils', () => {
       })
     })
 
+    it('ignores redirectRules when "ignoreRedirectRules" is true', () => {
+      expect(matchRoutes(routesMap, '/account?foo=bar', true)).toEqual({
+        location: { pathname: '/account', search: '?foo=bar' },
+        params: { foo: 'bar' },
+        route: {
+          component: 'AccountPage',
+          redirectRules: routesMap.get('/account').redirectRules
+        }
+      })
+
+      expect(routesMap.get('/account').redirectRules).not.toHaveBeenCalled()
+    })
+
     it('matches wildcard (*) route when pathname is not found', () => {
       expect(matchRoutes(routesMap, '/myAccount/purchases')).toEqual({
         location: { pathname: '/myAccount/purchases' },
@@ -1352,19 +1366,9 @@ describe('utils', () => {
         ])
       })
 
-      // called only once in previous test
       expect(
         preparedMatch.prefetched.get('bar').data.load
-      ).toHaveBeenCalledTimes(1)
-      expect(
-        preparedMatch.prefetched.get('bar').data.load
-      ).toHaveBeenCalledWith()
-      expect(
-        preparedMatch.prefetched.get('foo').data.load
-      ).toHaveBeenCalledTimes(1)
-      expect(
-        preparedMatch.prefetched.get('foo').data.load
-      ).toHaveBeenCalledWith()
+      ).not.toHaveBeenCalled()
     })
   })
 })

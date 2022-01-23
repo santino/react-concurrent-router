@@ -8,7 +8,7 @@ jest.mock('../createRouter')
 createMemoryHistory.mockReturnValue('MemoryHistory')
 
 describe('createMemoryRouter', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks()
   })
 

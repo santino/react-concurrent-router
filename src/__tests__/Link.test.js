@@ -42,7 +42,7 @@ const wrap = (props = {}) =>
   )
 
 describe('Link', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks()
   })
 
