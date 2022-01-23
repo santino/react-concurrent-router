@@ -9,11 +9,10 @@
   "unpkg": "umd/react-concurrent-router.production.min.js",
   "sideEffects": false,
   "engines": {
-    "node": "^16.12.0",
-    "npm": "^8.1.0"
+    "node": ">16.12.0"
   },
   "scripts": {
-    "build": "rimraf dist && npm run build:cjs&& npm run build:esm && npm run build:umd && npm run build:pick",
+    "build": "rimraf dist && yarn build:cjs&& yarn build:esm && yarn build:umd && yarn build:pick",
     "build:cjs": "cross-env BABEL_ENV=cjs rollup -c",
     "build:esm": "cross-env BABEL_ENV=esm rollup -c",
     "build:umd": "cross-env BABEL_ENV=umd rollup -c",
@@ -25,10 +24,9 @@
     "coverage": "jest --coverage",
     "postcoverage": "open-cli ./coverage/lcov-report/index.html",
     "coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls",
-    "prebundlesize": "npm run build",
     "bundlesize": "bundlesize",
     "precommit": "lint-staged",
-    "prepush": "npm run testonly",
+    "prepush": "yarn testonly",
     "cleanupminified": "rimraf dist/cjs/index.min.js dist/esm/index.min.js",
     "copydistfiles": "cp -rf package.json LICENCE README.md dist"
   },
