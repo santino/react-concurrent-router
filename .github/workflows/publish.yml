@@ -1,0 +1,35 @@
+name: Publish
+
+on:
+  release:
+    types: [created]
+  pull_request: # to be removed
+    branches: [ main ]
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Use Node 17.x
+      uses: actions/setup-node@v2
+      with:
+        node-version: 17.x
+    - name: Install fresh dependencies
+      run: yarn install --ignore-engines --frozen-lockfile
+    - name: Run tests
+      run: yarn testonly
+    - name: Build bundle
+      run: yarn build
+    - name: Cleanup minified
+      run: yarn cleanupminified
+    - name: Copy additional 'dist' files
+      run: yarn copydistfiles
+    - name: cd to 'dist' folder
+      run: cd dist
+    - name: Publish package
+      run: npm publish --dry-run
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

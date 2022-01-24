@@ -20,7 +20,7 @@
     "postbuild:pick": "rimraf dist/utils dist/createRouter dist/RouterContext rmdir",
     "format": "prettier-standard 'src/**/*.js'",
     "test": "jest --watch",
-    "testonly": "jest --runInBand --verbose && bundlewatch",
+    "testonly": "jest --runInBand --verbose",
     "coverage": "jest --coverage",
     "postcoverage": "open-cli ./coverage/lcov-report/index.html",
     "bundlewatch": "bundlewatch",

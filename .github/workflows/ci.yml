@@ -30,10 +30,8 @@ jobs:
           ${{ runner.os }}-yarn-${{ matrix.node-version }}-
           ${{ runner.os }}-yarn-
           ${{ runner.os }}-
-    - name: Install Dependencies using Yarn
+    - name: Install dependencies
       run: yarn install --ignore-engines && git checkout yarn.lock
-    - name: Install Dependencies using Yarn
-      run: yarn install
 
   test-and-coverage:
     needs: setup
@@ -60,7 +58,7 @@ jobs:
           ${{ runner.os }}-yarn-node-
           ${{ runner.os }}-yarn-
           ${{ runner.os }}-
-    - name: Install Dependencies using Yarn
+    - name: Install dependencies
       run: yarn install --ignore-engines && git checkout yarn.lock
     - name: Run tests plus coverage
       run: yarn coverage
@@ -106,7 +104,7 @@ jobs:
           ${{ runner.os }}-yarn-node-
           ${{ runner.os }}-yarn-
           ${{ runner.os }}-
-    - name: Install Dependencies using Yarn
+    - name: Install dependencies
       run: yarn install --ignore-engines && git checkout yarn.lock
     - name: Build package
       run: yarn build
