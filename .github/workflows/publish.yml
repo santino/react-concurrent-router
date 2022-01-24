@@ -27,9 +27,7 @@ jobs:
       run: yarn cleanupminified
     - name: Copy additional 'dist' files
       run: yarn copydistfiles
-    - name: cd to 'dist' folder
-      run: cd dist
     - name: Publish package
       env:
         NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-      run: npm publish --dry-run
+      run: cd dist && npm publish --dry-run
