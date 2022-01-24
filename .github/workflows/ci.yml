@@ -46,9 +46,10 @@ jobs:
       uses: actions/cache@v2
       with:
         path: '**/node_modules'
-        key: ${{ runner.os }}-yarn-${{matrix.node-version}}-${{ hashFiles('yarn.lock') }}
+        key: ${{ runner.os }}-yarn-node-${{matrix.node-version}}-${{ hashFiles('yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-yarn-${{matrix.node-version}}-
+          ${{ runner.os }}-yarn-node-${{matrix.node-version}}-
+          ${{ runner.os }}-yarn-node-
           ${{ runner.os }}-yarn-
           ${{ runner.os }}-
     - name: Install Dependencies using Yarn
@@ -59,7 +60,7 @@ jobs:
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.github_token }}
-        flag-name: run-${{ matrix.node_version }}
+        flag-name: run-node-${{matrix.node_version}}
         parallel: true
 
   coveralls-finished:
@@ -87,9 +88,10 @@ jobs:
       uses: actions/cache@v2
       with:
         path: '**/node_modules'
-        key: ${{ runner.os }}-yarn-${{matrix.node-version}}-${{ hashFiles('yarn.lock') }}
+        key: ${{ runner.os }}-yarn-node-${{matrix.node-version}}-${{ hashFiles('yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-yarn-${{matrix.node-version}}-
+          ${{ runner.os }}-yarn-node-${{matrix.node-version}}-
+          ${{ runner.os }}-yarn-node-
           ${{ runner.os }}-yarn-
           ${{ runner.os }}-
     - name: Install Dependencies using Yarn
