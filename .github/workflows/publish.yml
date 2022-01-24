@@ -3,8 +3,6 @@ name: Publish
 on:
   release:
     types: [created]
-  pull_request: # to be removed
-    branches: [ main ]
 
 jobs:
   setup:
@@ -30,4 +28,4 @@ jobs:
     - name: Publish package
       env:
         NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-      run: cd dist && npm publish --dry-run
+      run: cd dist && npm publish
