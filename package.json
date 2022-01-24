@@ -20,10 +20,10 @@
     "postbuild:pick": "rimraf dist/utils dist/createRouter dist/RouterContext rmdir",
     "format": "prettier-standard 'src/**/*.js'",
     "test": "jest --watch",
-    "testonly": "jest --runInBand --verbose && bundlesize",
+    "testonly": "jest --runInBand --verbose && bundlewatch",
     "coverage": "jest --coverage",
     "postcoverage": "open-cli ./coverage/lcov-report/index.html",
-    "bundlesize": "bundlesize",
+    "bundlewatch": "bundlewatch",
     "precommit": "lint-staged",
     "prepush": "yarn testonly",
     "cleanupminified": "rimraf dist/cjs/index.min.js dist/esm/index.min.js",
@@ -48,35 +48,22 @@
     "history",
     "relay"
   ],
-  "bundlesize": [
-    {
-      "path": "./dist/cjs/index.min.js",
-      "maxSize": "7.5 Kb",
-      "compression": "none"
-    },
-    {
-      "path": "./dist/cjs/index.min.js",
-      "maxSize": "3 Kb"
-    },
-    {
-      "path": "./dist/esm/index.min.js",
-      "maxSize": "7 Kb",
-      "compression": "none"
-    },
-    {
-      "path": "./dist/esm/index.min.js",
-      "maxSize": "3.5 Kb"
-    },
-    {
-      "path": "./dist/umd/react-concurrent-router.production.min.js",
-      "maxSize": "14.5 Kb",
-      "compression": "none"
-    },
-    {
-      "path": "./dist/umd/react-concurrent-router.production.min.js",
-      "maxSize": "5.5 Kb"
-    }
-  ],
+  "bundlewatch": {
+    "files": [
+      {
+        "path": "./dist/cjs/index.min.js",
+        "maxSize": "3 Kb"
+      },
+      {
+        "path": "./dist/esm/index.min.js",
+        "maxSize": "3.5 Kb"
+      },
+      {
+        "path": "./dist/umd/react-concurrent-router.production.min.js",
+        "maxSize": "5.5 Kb"
+      }
+    ]
+  },
   "publishConfig": {
     "directory": "dist"
   },
@@ -123,7 +110,7 @@
     "babel-eslint": "^10.1.0",
     "babel-jest": "^27.4.6",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
-    "bundlesize": "^0.18.1",
+    "bundlewatch": "^0.3.3",
     "cherry-pick": "^0.5.0",
     "coveralls": "^3.1.1",
     "cross-env": "^7.0.3",
