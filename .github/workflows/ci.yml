@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [stable, lts/*]
+        node-version: [lts/*, node]
 
     steps:
     - name: Checkout repository
@@ -37,7 +37,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [stable, lts/*]
+        node-version: [lts/*, node]
 
     steps:
     - name: Checkout repository
@@ -60,7 +60,7 @@ jobs:
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.github_token }}
-        flag-name: run-node-${{matrix.node-version}}
+        flag-name: run-node-${{node -v}}
         parallel: true
 
   coveralls-finished:
@@ -79,7 +79,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [stable, lts/*]
+        node-version: [lts/*, node]
 
     steps:
     - name: Checkout repository
