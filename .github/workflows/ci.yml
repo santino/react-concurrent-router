@@ -17,13 +17,17 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+    - name: Use Node ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
     - name: Cache Yarn
       uses: actions/cache@v2
       with:
         path: '**/node_modules'
-        key: ${{ runner.os }}-yarn-${{matrix.node-version}}-${{ hashFiles('yarn.lock') }}
+        key: ${{ runner.os }}-yarn-${{ matrix.node-version }}-${{ hashFiles('yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-yarn-${{matrix.node-version}}-
+          ${{ runner.os }}-yarn-${{ matrix.node-version }}-
           ${{ runner.os }}-yarn-
           ${{ runner.os }}-
     - name: Install Dependencies using Yarn
@@ -42,13 +46,17 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+    - name: Use Node ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
     - name: Cache Yarn
       uses: actions/cache@v2
       with:
         path: '**/node_modules'
-        key: ${{ runner.os }}-yarn-node-${{matrix.node-version}}-${{ hashFiles('yarn.lock') }}
+        key: ${{ runner.os }}-yarn-node-${{ matrix.node-version }}-${{ hashFiles('yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-yarn-node-${{matrix.node-version}}-
+          ${{ runner.os }}-yarn-node-${{ matrix.node-version }}-
           ${{ runner.os }}-yarn-node-
           ${{ runner.os }}-yarn-
           ${{ runner.os }}-
@@ -84,13 +92,17 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+    - name: Use Node ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
     - name: Cache Yarn
       uses: actions/cache@v2
       with:
         path: '**/node_modules'
-        key: ${{ runner.os }}-yarn-node-${{matrix.node-version}}-${{ hashFiles('yarn.lock') }}
+        key: ${{ runner.os }}-yarn-node-${{ matrix.node-version }}-${{ hashFiles('yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-yarn-node-${{matrix.node-version}}-
+          ${{ runner.os }}-yarn-node-${{ matrix.node-version }}-
           ${{ runner.os }}-yarn-node-
           ${{ runner.os }}-yarn-
           ${{ runner.os }}-
