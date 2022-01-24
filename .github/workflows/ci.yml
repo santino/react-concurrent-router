@@ -60,7 +60,7 @@ jobs:
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.github_token }}
-        flag-name: run-node-${{matrix.node_version}}
+        flag-name: run-node-${{matrix.node-version}}
         parallel: true
 
   coveralls-finished:
