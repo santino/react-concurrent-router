@@ -25,9 +25,10 @@ jobs:
       uses: actions/cache@v2
       with:
         path: '**/node_modules'
-        key: ${{ runner.os }}-yarn-${{ matrix.node-version }}-${{ hashFiles('yarn.lock') }}
+        key: ${{ runner.os }}-yarn-node-${{ matrix.node-version }}-${{ hashFiles('yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-yarn-${{ matrix.node-version }}-
+          ${{ runner.os }}-yarn-node-${{ matrix.node-version }}-
+          ${{ runner.os }}-yarn-node-
           ${{ runner.os }}-yarn-
           ${{ runner.os }}-
     - name: Install dependencies

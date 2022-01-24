@@ -52,15 +52,18 @@
     "files": [
       {
         "path": "./dist/cjs/index.min.js",
-        "maxSize": "3 Kb"
+        "maxSize": "7.5 Kb",
+        "compression": "none"
       },
       {
         "path": "./dist/esm/index.min.js",
-        "maxSize": "3.5 Kb"
+        "maxSize": "7 Kb",
+        "compression": "none"
       },
       {
         "path": "./dist/umd/react-concurrent-router.production.min.js",
-        "maxSize": "5.5 Kb"
+        "maxSize": "14.5 Kb",
+        "compression": "none"
       }
     ]
   },
