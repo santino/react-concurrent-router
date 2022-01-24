@@ -31,7 +31,7 @@ jobs:
     - name: Install Dependencies using Yarn
       run: yarn install
 
-  test-plus-coverage:
+  test-and-coverage:
     needs: setup
     runs-on: ubuntu-latest
 
@@ -56,10 +56,21 @@ jobs:
     - name: Run tests plus coverage
       run: yarn coverage
     - name: Track coverage
-      if: github.event_name == 'push'
-      env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-      run: yarn coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        flag-name: run-${{ matrix.node_version }}
+        parallel: true
+
+  coveralls-finished:
+    needs: test-and-coverage
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true
 
   build-plus-sizecheck:
     needs: setup
@@ -86,4 +97,6 @@ jobs:
     - name: Build package
       run: yarn build
     - name: Check bundle-size
+      env:
+        BUNDLESIZE_GITHUB_TOKEN: ${{ secrets.BUNDLESIZE_GITHUB_TOKEN }}
       run: yarn bundlesize

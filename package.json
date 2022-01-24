@@ -23,7 +23,6 @@
     "testonly": "jest --runInBand --verbose && bundlesize",
     "coverage": "jest --coverage",
     "postcoverage": "open-cli ./coverage/lcov-report/index.html",
-    "coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls",
     "bundlesize": "bundlesize",
     "precommit": "lint-staged",
     "prepush": "yarn testonly",
