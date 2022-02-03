@@ -1,7 +1,3 @@
-/**
- * @jest-environment jsdom
- */
-
 import { createContext } from 'react'
 import RouterContext from '../RouterContext'
 
