@@ -71,7 +71,7 @@
     "directory": "dist"
   },
   "standard": {
-    "parser": "babel-eslint",
+    "parser": "@babel/eslint-parser",
     "ignore": [
       "/dist/"
     ],
@@ -96,6 +96,7 @@
   "devDependencies": {
     "@ampproject/rollup-plugin-closure-compiler": "^0.27.0",
     "@babel/core": "^7.18.2",
+    "@babel/eslint-parser": "^7.18.2",
     "@babel/plugin-proposal-object-rest-spread": "^7.18.0",
     "@babel/plugin-transform-object-assign": "^7.16.7",
     "@babel/plugin-transform-react-constant-elements": "^7.17.12",
@@ -110,7 +111,6 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@types/react": "^18.0.12",
-    "babel-eslint": "^10.1.0",
     "babel-jest": "^28.1.1",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "bundlewatch": "^0.3.3",
