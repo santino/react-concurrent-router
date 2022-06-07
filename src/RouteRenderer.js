@@ -5,7 +5,6 @@ import React, {
   useMemo,
   useState
 } from 'react'
-import { unstable_batchedUpdates } from 'react-dom'
 import PropTypes from 'prop-types'
 import RouterContext from './RouterContext'
 
@@ -83,12 +82,8 @@ const RouteRenderer = ({ pendingIndicator }) => {
           ? await computePendingEntry(nextEntry)
           : nextEntry
 
-      // Don't get fooled by the 'unstable' prefix; according to Dan this is one of the most stable
-      // hooks. It allow us to batch state updates, which ultimatey prevents multiple re-renders.
-      unstable_batchedUpdates(() => {
-        setRouteEntry(routeEntry)
-        setIsPendingEntry(false)
-      })
+      setRouteEntry(routeEntry)
+      setIsPendingEntry(false)
     })
     return () => dispose() // cleanup/unsubscribe function
   }, [assistPrefetch, awaitComponent, computePendingEntry, subscribe])
