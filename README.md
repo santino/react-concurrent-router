@@ -481,7 +481,6 @@ You can use this hook to perform programmatic navigation. It returns an object w
 - `go`: navigates backward/forward by "n" entries in the stack, identified by relative position to the current page (always 0). The argument is a number, negative values will navigate backward, positive will navigate forward
 - `goBack`, move backward by one entry through the history stack. No arguments
 - `goForward`: move forward by one entry through the history stack. No arguments
-- `canGo`: only provided by Memory Router; check if can navigate to given "n" pointer in the history stack. The argument is the same as `go`
 
 ### useHistory
 ```js

@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x, 17.x]
+        node-version: [16.x, 18.x]
 
     steps:
     - name: Checkout repository
@@ -40,7 +40,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x, 17.x]
+        node-version: [16.x, 18.x]
 
     steps:
     - name: Checkout repository
@@ -86,7 +86,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x, 17.x]
+        node-version: [16.x, 18.x]
 
     steps:
     - name: Checkout repository

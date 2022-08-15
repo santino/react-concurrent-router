@@ -8,9 +8,8 @@ useContext.mockImplementation(() => ({
     push: 'mockPush',
     replace: 'mockReplace',
     go: 'mockGo',
-    goBack: 'mockGoBack',
-    goForward: 'mockGoForward',
-    canGo: 'mockCanGo',
+    back: 'mockBack',
+    forward: 'mockForward',
     foo: 'bar'
   },
   baz: 'qux'
@@ -27,9 +26,8 @@ describe('useNavigation', () => {
       push: 'mockPush',
       replace: 'mockReplace',
       go: 'mockGo',
-      goBack: 'mockGoBack',
-      goForward: 'mockGoForward',
-      canGo: 'mockCanGo'
+      goBack: 'mockBack',
+      goForward: 'mockForward'
     })
   })
 })
