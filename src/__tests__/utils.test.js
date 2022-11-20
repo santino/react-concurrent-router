@@ -51,7 +51,7 @@ describe('utils', () => {
           qux: ['quux', 'quuz'],
           baz: 'qux'
         })
-      ).toBe('?baz=qux&corge=grault&foo=bar&qux=quux,quuz')
+      ).toBe('?baz=qux&corge=grault&foo=bar&qux=quux&qux=quuz')
     })
   })
 

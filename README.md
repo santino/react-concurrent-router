@@ -7,7 +7,6 @@ Performant routing embracing React [Concurrent UI patterns](https://it.reactjs.o
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [Overview](#overview)
     - [Accessibility](#accessibility)
     - [More info on performance](#more-info-on-performance)
@@ -24,6 +23,8 @@ Performant routing embracing React [Concurrent UI patterns](https://it.reactjs.o
   - [useRouter](#userouter)
   - [useNavigation](#usenavigation)
   - [useHistory](#usehistory)
+  - [useParams](#useparams)
+  - [useSearchParams](#usesearchparams)
   - [useBeforeRouteLeave](#usebeforerouteleave)
 - [Redirect rules](#redirect-rules)
 - [Group routes](#group-routes)
@@ -435,7 +436,7 @@ export default router
 Hopefully, this illustrates the power of the router when it comes to data prefetching, as well as the full customisation opportunity, should you need it.
 
 ## Hooks
-React Concurrent Router currently provides four different hooks.
+React Concurrent Router provides the following hooks.
 
 ### useRouter
 ```js
@@ -504,6 +505,61 @@ Returns an object with the following properties that provides information about 
 - `action`: current (most recent) action that modified the history stack (`'POP'`, `'PUSH'` or `'REPLACE'`)
 - `index`: only provided by Memory Router; current index in the history stack
 - `entries`: only provided by Memory Router; all entries available in history instance
+
+### useParams
+```js
+import useParams from 'react-concurrent-router/useParams'
+
+const MyComponent = () => {
+  const { foo, bar, baz } = useParams()
+
+  return (
+    <>
+      <div>the value for the "foo" param is: ${foo}</div>
+      <div>the value for the "bar" param is: ${bar}</div>
+      <div>the value for the "baz" param is: ${baz}</div>
+    <>
+  )
+}
+```
+Returns an object with the key/value pairs for all params of the current URL; including named, query and hash params.  
+For instance assuming the URL rendering the component above is `/home/fooValue?bar=barValue#baz=bazValue`, where the route for the URL is `/home/:foo` (hence `foo` being a named parameter); the component would return the following content:
+```txt
+the value for the "foo" param is: fooValue
+the value for the "bar" param is: barValue
+the value for the "baz" param is: bazValue
+```
+
+### useSearchParams
+```js
+import useSearchParams from 'react-concurrent-router/useSearchParams'
+
+const MyComponent = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  return (
+    <>
+      <div>current search params object is: ${JSON.stringify(searchParams)}</div>
+      <button onClick={() => setSearchParams({ quux: 'corge' })}>
+        replaceSearchParams
+      </button>
+      <button
+        onClick={() =>
+          setSearchParams(currentParams => ({
+            ...currentParams,
+            quux: 'corge'
+          }))
+        }
+      >
+        mergeSearchParms
+      </button>
+    <>
+  )
+}
+```
+Like the popular `useState` hook from React, this hook returns an array with the following two items:
+- `searchParams`: an object containing the key/value pairs of the query params available in the URL for the current location
+- `setSearchParams`: a function to set new query parameters in the URL for the current location. Like React's `useState` this function can take an object which sets new query parameters (overriding the existing ones); or a function receiving the current query parameters, as the only argument, and returning an object which ultimately sets new query parameters (useful when you want to compute new parameters from current parameters, or merge current and new parameters)
 
 ### useBeforeRouteLeave
 I consider this a bonus hook which hopefully will remove any effort and overhead when you want to have some degree of control to prevent your users from accidentally leaving the page they are in; for example in cases that would cause loss of data entered on the page without submitting.

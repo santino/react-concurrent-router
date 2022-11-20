@@ -14,7 +14,9 @@ const configBase = {
     useBeforeRouteLeave: 'src/useBeforeRouteLeave',
     useHistory: 'src/useHistory',
     useNavigation: 'src/useNavigation',
+    useParams: 'src/useParams',
     useRouter: 'src/useRouter',
+    useSearchParams: 'src/useSearchParams',
     RouterProvider: 'src/RouterProvider',
     RouteRenderer: 'src/RouteRenderer',
     Link: 'src/Link'
@@ -48,7 +50,8 @@ const bundles = {
       external: configBase.external,
       plugins: [babel(configBase.babelConfig)]
     },
-    { // minified build only used to monitor bundlesize; will not be published
+    {
+      // minified build only used to monitor bundlesize; will not be published
       input: 'dist/cjs/index.js',
       output: {
         file: 'dist/cjs/index.min.js'
@@ -75,7 +78,8 @@ const bundles = {
       external: configBase.external,
       plugins: [babel(configBase.babelConfig)]
     },
-    { // minified build only used to monitor bundlesize; will not be published
+    {
+      // minified build only used to monitor bundlesize; will not be published
       input: 'dist/esm/index.js',
       output: {
         file: 'dist/esm/index.min.js'

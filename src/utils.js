@@ -32,7 +32,7 @@ export const sortAndStringifyRequestParams = params => {
 
     optimisedParamsArray.push({
       index: optimisedParamsArray.length,
-      value: param.toLowerCase()
+      value: param
     })
   }
 
@@ -40,13 +40,19 @@ export const sortAndStringifyRequestParams = params => {
     .sort(({ value: firstValue }, { value: secondValue }) =>
       firstValue > secondValue ? 1 : -1
     )
-    .reduce(
-      (identifier, element) =>
-        `${identifier}${!identifier ? '?' : '&'}${element.value}=${
-          params[element.value]
-        }`,
-      ''
-    )
+    .reduce((identifier, element) => {
+      const rawParamValue = params[element.value]
+      const paramValue = Array.isArray(rawParamValue)
+        ? rawParamValue.reduce(
+            (params, value, index) =>
+              params.concat(index >= 1 ? `&${element.value}=${value}` : value),
+            ''
+          )
+        : rawParamValue
+      return `${identifier}${!identifier ? '?' : '&'}${
+        element.value
+      }=${paramValue}`
+    }, '')
 }
 
 /**
