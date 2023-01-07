@@ -31,6 +31,14 @@ const createRouter = ({
     if (locationsMatch(currentEntry.location, location, true)) return // still on the same route
 
     const match = matchRoutes(routesMap, location)
+
+    if (location.state?.skipRender) {
+      // Just replace the location without any re-render. `match.location` ensures location state is cleaned-up
+      const { route, ...matchProps } = match
+      currentEntry = { ...currentEntry, ...matchProps }
+      return history.replace(match.location)
+    }
+
     const nextEntry = prepareMatch(match, assistPrefetch, awaitPrefetch)
 
     if (!locationsMatch(match.location, location, true)) {

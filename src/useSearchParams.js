@@ -3,15 +3,14 @@ import { paramsStringToObject, sortAndStringifyRequestParams } from './utils'
 import RouterContext from './RouterContext'
 
 const useSearchParams = () => {
-  const {
-    history: { location, push }
-  } = useContext(RouterContext)
+  const { history } = useContext(RouterContext)
+  const { location } = history
   const searchParams = useMemo(() => paramsStringToObject(location.search), [
     location.search
   ])
   const setSearchParams = useCallback(
-    newParams => {
-      push(
+    (newParams, { replace = false } = {}) => {
+      history[replace ? 'replace' : 'push'](
         {
           pathname: location.pathname,
           search: sortAndStringifyRequestParams(
@@ -20,7 +19,7 @@ const useSearchParams = () => {
               : newParams
           )
         },
-        location.state
+        { ...location.state, ...(replace && { skipRender: true }) }
       )
     },
     [location, searchParams]
