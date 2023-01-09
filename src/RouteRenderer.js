@@ -62,6 +62,8 @@ const RouteRenderer = ({ pendingIndicator }) => {
   // On mount subscribe for route changes
   useEffect(() => {
     const dispose = subscribe(async nextEntry => {
+      if (nextEntry.skipRender) return
+
       setIsPendingEntry(true)
 
       // In case of awaitComponent we want to keep user on existing route until the new component

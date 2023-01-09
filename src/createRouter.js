@@ -30,16 +30,16 @@ const createRouter = ({
   history.listen(({ location }) => {
     if (locationsMatch(currentEntry.location, location, true)) return // still on the same route
 
+    const skipRender = location.state && location.state.skipRender
     const match = matchRoutes(routesMap, location)
-
-    if (location.state?.skipRender) {
-      // Just replace the location without any re-render. `match.location` ensures location state is cleaned-up
-      const { route, ...matchProps } = match
-      currentEntry = { ...currentEntry, ...matchProps }
-      return history.replace(match.location)
-    }
-
-    const nextEntry = prepareMatch(match, assistPrefetch, awaitPrefetch)
+    const nextEntry = skipRender
+      ? {
+          ...currentEntry,
+          location: match.location,
+          params: match.params,
+          skipRender: true
+        }
+      : prepareMatch(match, assistPrefetch, awaitPrefetch)
 
     if (!locationsMatch(match.location, location, true)) {
       // requested route had redirectRules that have been applied, hence

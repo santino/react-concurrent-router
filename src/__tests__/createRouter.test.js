@@ -373,14 +373,20 @@ describe('createRouter', () => {
       const router = createRouter(defaultProps)
       const mockSubscribeCallback = jest.fn()
       router.subscribe(mockSubscribeCallback)
-      locationsMatch.mockReturnValueOnce(false).mockReturnValueOnce(false)
+      locationsMatch.mockReturnValueOnce(false)
       matchRoutes.mockReturnValueOnce({ location: matchedRoute })
+
+      expect(matchRoutes).toHaveBeenCalledTimes(1)
+      expect(locationsMatch).toHaveBeenCalledTimes(1)
+      expect(prepareMatch).toHaveBeenCalledTimes(1)
+
       defaultProps.history.listen.mock.calls[0][0]({
         location: skipRenderLocation
       }) // trigger history listener
 
-      expect(locationsMatch).toHaveBeenCalledTimes(2)
-      expect(locationsMatch).toHaveBeenLastCalledWith(
+      expect(locationsMatch).toHaveBeenCalledTimes(3)
+      expect(locationsMatch).toHaveBeenNthCalledWith(
+        2,
         'preparedLocation',
         skipRenderLocation,
         true
@@ -390,14 +396,15 @@ describe('createRouter', () => {
         'routesMap',
         skipRenderLocation
       )
-      expect(defaultProps.history.replace).toHaveBeenCalledTimes(1)
-      expect(defaultProps.history.replace).toHaveBeenCalledWith(matchedRoute)
-      expect(router.get()).toEqual({
-        component: mockComponent,
-        location: matchedRoute
-      })
       expect(prepareMatch).toHaveBeenCalledTimes(1)
-      expect(mockSubscribeCallback).not.toHaveBeenCalled()
+      expect(defaultProps.history.replace).not.toHaveBeenCalled()
+      expect(mockSubscribeCallback).toHaveBeenCalledTimes(1)
+      expect(mockSubscribeCallback).toHaveBeenCalledWith({
+        component: mockComponent,
+        location: matchedRoute,
+        params: undefined,
+        skipRender: true
+      })
     })
   })
 })

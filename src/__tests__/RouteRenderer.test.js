@@ -368,4 +368,37 @@ describe('RouteRenderer', () => {
       )
     }, 520)
   })
+
+  it('does not re-render when "skipRender" is true', async () => {
+    const mockComponentRead = jest.fn()
+    const { getByTestId, queryByText } = wrap()
+    expect(getByTestId('routeEntry')).toHaveTextContent('Initial')
+
+    // mock subscription notification
+    await act(() => {
+      mockRouterSubscribe.mock.calls[0][0](newRouteEntry)
+    })
+
+    expect(queryByText('Pending indicator...')).toBe(null)
+    expect(getByTestId('routeEntry')).toHaveTextContent('Subscribed')
+    expect(getByTestId('prefetchedProp')).toHaveTextContent('{"quux":"quuz"}')
+    expect(getByTestId('paramsProp')).toHaveTextContent('{"corge":"grault"}')
+
+    await act(() => {
+      mockRouterSubscribe.mock.calls[0][0]({
+        component: {
+          read: mockComponentRead
+        },
+        prefetched: { alpha: 'beta' },
+        params: { gamma: 'delta' },
+        skipRender: true
+      })
+    })
+
+    expect(queryByText('Pending indicator...')).toBe(null)
+    expect(getByTestId('routeEntry')).toHaveTextContent('Subscribed')
+    expect(getByTestId('prefetchedProp')).toHaveTextContent('{"quux":"quuz"}')
+    expect(getByTestId('paramsProp')).toHaveTextContent('{"corge":"grault"}')
+    expect(mockComponentRead).not.toHaveBeenCalled()
+  })
 })

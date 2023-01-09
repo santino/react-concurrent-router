@@ -1,22 +1,72 @@
-import { useContext } from 'react'
-import RouterContext from '../RouterContext'
+/**
+ * @jest-environment jsdom
+ */
+import '@testing-library/jest-dom/extend-expect'
+import React, { useContext } from 'react'
+import { act, render, screen } from '@testing-library/react'
 import useParams from '../useParams'
 
-jest.mock('react')
+jest.mock('react', () => ({
+  ...jest.requireActual('react'),
+  useContext: jest.fn()
+}))
+const mockSubscribeDispose = jest.fn()
+const mockSubscribe = jest.fn().mockReturnValue(mockSubscribeDispose)
 useContext.mockImplementation(() => ({
-  get: jest.fn().mockReturnValue({ params: { foo: 'bar', baz: 'qux' } })
+  get: jest.fn().mockReturnValue({ params: { foo: 'bar', baz: 'qux' } }),
+  subscribe: mockSubscribe
 }))
 
-describe('useParams', () => {
-  it('exports an object with expected route params from RouterContext', () => {
-    const params = useParams()
+const ExampleComponent = () => {
+  const params = useParams()
 
-    expect(useContext).toHaveBeenCalledTimes(1)
-    expect(useContext).toHaveBeenCalledWith(RouterContext)
-    expect(params).toEqual(expect.any(Object))
-    expect(params).toEqual({
-      foo: 'bar',
-      baz: 'qux'
-    })
+  return <div>params value: "{JSON.stringify(params)}"</div>
+}
+
+jest.useFakeTimers()
+jest.spyOn(global, 'setTimeout')
+
+describe('useParams', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('returns current params correctly', () => {
+    render(<ExampleComponent />)
+
+    expect(screen.queryByText(/params value:/)).toHaveTextContent(
+      'params value: "{"foo":"bar","baz":"qux"}"'
+    )
+  })
+
+  it('automatically updates params when receiving new entry from subscription', () => {
+    render(<ExampleComponent />)
+
+    expect(mockSubscribe).toHaveBeenCalledTimes(1)
+
+    expect(setTimeout).not.toHaveBeenCalled()
+    mockSubscribe.mock.calls[0][0]({
+      params: { alpha: 'beta' }
+    }) // trigger subscription
+    expect(setTimeout).toHaveBeenCalledTimes(1)
+    expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), 1)
+    act(() => jest.runAllTimers()) // wait setTimeout
+
+    expect(screen.queryByText(/params value:/)).toHaveTextContent(
+      'params value: "{"alpha":"beta"}"'
+    )
+
+    expect(mockSubscribeDispose).not.toHaveBeenCalled()
+  })
+
+  it('disposes of subscription when unmounting', () => {
+    const { unmount } = render(<ExampleComponent />)
+
+    expect(mockSubscribeDispose).not.toHaveBeenCalled()
+
+    unmount()
+
+    expect(mockSubscribe).toHaveBeenCalledTimes(1)
+    expect(mockSubscribeDispose).toHaveBeenCalledTimes(1)
   })
 })
