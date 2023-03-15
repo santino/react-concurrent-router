@@ -3,7 +3,7 @@
  */
 import '@testing-library/jest-dom/extend-expect'
 import React, { useContext } from 'react'
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 
 import useSearchParams from '../useSearchParams'
 
@@ -45,7 +45,7 @@ const ExampleComponent = () => {
         onClick={() =>
           setSearchParams(currentParams => ({
             ...currentParams,
-            quux: 'corge'
+            'quux/': 'corge='
           }))
         }
       >
@@ -121,7 +121,7 @@ describe('useSearchParams', () => {
     expect(mockHistoryPush).toHaveBeenCalledWith(
       {
         pathname: '/home',
-        search: '?baz=qux&foo=bar&quux=corge'
+        search: '?baz=qux&foo=bar&quux%2F=corge%3D'
       },
       {}
     )

@@ -39,8 +39,12 @@ describe('utils', () => {
   describe('sortAndStringifyRequestParams', () => {
     it('returns expected value on simple object', () => {
       expect(
-        sortAndStringifyRequestParams({ foo: 'bar', qux: 'quux', baz: 'qux' })
-      ).toBe('?baz=qux&foo=bar&qux=quux')
+        sortAndStringifyRequestParams({
+          foo: 'bar',
+          qux: 'quux',
+          'baz/': 'qux='
+        })
+      ).toBe('?baz%2F=qux%3D&foo=bar&qux=quux')
     })
 
     it('returns expected value on simple object with array values', () => {

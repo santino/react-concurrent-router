@@ -167,7 +167,7 @@ Let's share some extra detail about these router config properties:
 - `routes`: mandatory array of objects declaring route entries; detailed in the [routes configuration paragraph](#routes-configuration)
 - `awaitComponent`: a boolean with default value `false`. When set to true it will tell the router to keep rendering the current route and hold new route rendering until code preloading for the latest is complete; more info on the [Suspense boundaries alternative paragraph](#suspense-boundaries-alternative)
 - `assistPrefetch`: a boolean with default value `false`. When set to true it will let the router transform prefetch requests into "Suspendable" resources; more info on the [data prefetching paragraph](#data-prefetching)
-- `awaitPrefetch`: a boolean with default value `false`. When set to true it will tell the router to keep rendering the urrent route and hold new route rendering until data prefetch for the latest is complete; more info on the [Suspense boundaries alternative paragraph](#suspense-boundaries-alternative)
+- `awaitPrefetch`: a boolean with default value `false`. When set to true it will tell the router to keep rendering the current route and hold new route rendering until data prefetch for the latest is complete; more info on the [Suspense boundaries alternative paragraph](#suspense-boundaries-alternative)
 - `window`: this is the only property accepted for both, the Browser and Hash router. `window` defaults to the [defaultView of the current document](https://developer.mozilla.org/en-US/docs/Web/API/Document/defaultView). However, you might want to customise this when using the router on a window that doesn't correspond to the one of the main document; an iFrame is probably the perfect example
 - `initialEntries`: available only on Memory Router; defaults to `['/']`. This is an array of locations in the history stack, similar to what you would have when you've been navigating through a few pages in your application. The values in the array could be a plain string path or a [location object](https://developer.mozilla.org/en-US/docs/Web/API/Location)
 - `initialIndex`: available only on Memory Router; defaults to the index of the last item in `initialEntries`. The value must be a number that represents the index of the location you want to set as current in the history stack. Normally when navigating through pages in your application you add entries on the history stack and the last entry is always the only currently active; hence the default value. However, when navigating backward or forward you keep the entries in the stack but change the index; this property can help simulate this behaviour
@@ -335,7 +335,7 @@ const routes = [ /* routes objects as per example above */ ]
 const router = createBrowserRouter({
   routes,
   assistPrefetch: true, // you want the router to integrate data prefetch requests with React Suspense
-  awaitPrefetch: false // Suspense alternaive to hold new route rendering until data prefetch is completed
+  awaitPrefetch: false // Suspense alternative to hold new route rendering until data prefetch is completed
 })
 
 export default router
