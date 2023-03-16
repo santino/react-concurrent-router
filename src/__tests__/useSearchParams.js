@@ -121,7 +121,7 @@ describe('useSearchParams', () => {
     expect(mockHistoryPush).toHaveBeenCalledWith(
       {
         pathname: '/home',
-        search: '?baz=qux&foo=bar&quux%2F=corge%3D'
+        search: '?baz=qux&foo=bar&quux/=corge%3D'
       },
       {}
     )

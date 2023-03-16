@@ -44,7 +44,7 @@ describe('utils', () => {
           qux: 'quux',
           'baz/': 'qux='
         })
-      ).toBe('?baz%2F=qux%3D&foo=bar&qux=quux')
+      ).toBe('?baz/=qux%3D&foo=bar&qux=quux')
     })
 
     it('returns expected value on simple object with array values', () => {

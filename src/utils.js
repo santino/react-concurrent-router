@@ -42,16 +42,17 @@ export const sortAndStringifyRequestParams = params => {
     )
     .reduce((identifier, element) => {
       const rawParamValue = params[element.value]
-      const paramName = encodeURIComponent(element.value)
       const paramValue = Array.isArray(rawParamValue)
         ? rawParamValue.reduce((params, value, index) => {
             const encodedValue = encodeURIComponent(value)
             return params.concat(
-              index >= 1 ? `&${paramName}=${encodedValue}` : encodedValue
+              index >= 1 ? `&${element.value}=${encodedValue}` : encodedValue
             )
           }, '')
         : encodeURIComponent(rawParamValue)
-      return `${identifier}${!identifier ? '?' : '&'}${paramName}=${paramValue}`
+      return `${identifier}${!identifier ? '?' : '&'}${
+        element.value
+      }=${paramValue}`
     }, '')
 }
 

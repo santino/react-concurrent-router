@@ -1,6 +1,6 @@
 {
   "name": "react-concurrent-router",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Performant routing embracing React concurrent UI patterns",
   "author": "Santino Puleio",
   "license": "MIT",
