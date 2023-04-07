@@ -79,10 +79,9 @@ const RouteRenderer = ({ pendingIndicator }) => {
       // defer them. When we can't defer prefetch entities we will continue to show the current
       // route entry whilst we wait for a response; otherwise we render the new route immediately and
       // let the component deal with loading states while prefetching.
-      const routeEntry =
-        assistPrefetch && nextEntry.prefetched
-          ? await computePendingEntry(nextEntry)
-          : nextEntry
+      const routeEntry = nextEntry.assistedPrefetch
+        ? await computePendingEntry(nextEntry)
+        : nextEntry
 
       setRouteEntry(routeEntry)
       setIsPendingEntry(false)

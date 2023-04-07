@@ -138,6 +138,7 @@ describe('RouteRenderer', () => {
   it('Maps correctly "prefetched" props on component returned by subscription, in assist-prefetch mode', async () => {
     const customNewEntry = {
       ...newRouteEntry,
+      assistedPrefetch: true,
       prefetched: new Map([
         [
           'testData',
@@ -227,6 +228,7 @@ describe('RouteRenderer', () => {
           )
         })
       },
+      assistedPrefetch: true,
       prefetched: new Map([
         [
           'testData',
@@ -297,6 +299,7 @@ describe('RouteRenderer', () => {
           )
         })
       },
+      assistedPrefetch: true,
       prefetched: new Map([
         [
           'nonDeferrableData',

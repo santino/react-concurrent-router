@@ -1173,7 +1173,9 @@ describe('utils', () => {
       expect(preparedMatch).toEqual({
         component: match.route.component,
         location: match.location,
-        params: match.params
+        params: match.params,
+        prefetched: undefined,
+        assistedPrefetch: false
       })
     })
 
@@ -1197,6 +1199,7 @@ describe('utils', () => {
         component: match.route.component,
         location: match.location,
         params: match.params,
+        assistedPrefetch: false,
         prefetched: 'prefetchedData'
       })
     })
@@ -1217,8 +1220,66 @@ describe('utils', () => {
       expect(preparedMatch).toEqual({
         component: match.route.component,
         location: match.location,
-        params: match.params
+        params: match.params,
+        prefetched: undefined,
+        assistedPrefetch: false,
       })
+    })
+
+    it('behaves as expected when assistPrefetch is false but route has assistedPrefetch', () => {
+      const match = {
+        route: {
+          assistedPrefetch: jest.fn().mockReturnValue({
+            foo: () => 'prefetchedFoo',
+            bar: { defer: false, data: () => 'prefetchedBar' }
+          }),
+          component: { load: jest.fn() }
+        },
+        params: { foo: 'bar' },
+        location: { pathname: 'matchedLocationAssistedPrefetch' }
+      }
+      const preparedMatch = prepareMatch(match, false)
+
+      expect(match.route.assistedPrefetch).toHaveBeenCalledTimes(1)
+      expect(match.route.assistedPrefetch).toHaveBeenCalledWith(match.params)
+      expect(match.route.component.load).toHaveBeenCalledTimes(1)
+      expect(match.route.component.load).toHaveBeenCalledWith()
+
+      expect(preparedMatch).toEqual({
+        component: match.route.component,
+        location: match.location,
+        params: match.params,
+        assistedPrefetch: true,
+        prefetched: new Map([
+          [
+            'foo',
+            {
+              defer: true,
+              data: { load: expect.any(Function), read: expect.any(Function) }
+            }
+          ],
+          [
+            'bar',
+            {
+              defer: false,
+              data: { load: expect.any(Function), read: expect.any(Function) }
+            }
+          ]
+        ])
+      })
+
+      expect(
+        preparedMatch.prefetched.get('bar').data.load
+      ).toHaveBeenCalledTimes(1)
+      expect(
+        preparedMatch.prefetched.get('bar').data.load
+      ).toHaveBeenCalledWith()
+      expect(
+        preparedMatch.prefetched.get('foo').data.load
+      ).toHaveBeenCalledTimes(1)
+      expect(
+        preparedMatch.prefetched.get('foo').data.load
+      ).toHaveBeenCalledWith()
     })
 
     it('behaves as expected when assistPrefetch is true', () => {
@@ -1244,6 +1305,63 @@ describe('utils', () => {
         component: match.route.component,
         location: match.location,
         params: match.params,
+        assistedPrefetch: true,
+        prefetched: new Map([
+          [
+            'foo',
+            {
+              defer: true,
+              data: { load: expect.any(Function), read: expect.any(Function) }
+            }
+          ],
+          [
+            'bar',
+            {
+              defer: false,
+              data: { load: expect.any(Function), read: expect.any(Function) }
+            }
+          ]
+        ])
+      })
+
+      expect(
+        preparedMatch.prefetched.get('bar').data.load
+      ).toHaveBeenCalledTimes(1)
+      expect(
+        preparedMatch.prefetched.get('bar').data.load
+      ).toHaveBeenCalledWith()
+      expect(
+        preparedMatch.prefetched.get('foo').data.load
+      ).toHaveBeenCalledTimes(1)
+      expect(
+        preparedMatch.prefetched.get('foo').data.load
+      ).toHaveBeenCalledWith()
+    })
+
+    it('behaves as expected when assistPrefetch is false but awaitPrefetch is true and route has assistedPrefetch', () => {
+      const match = {
+        route: {
+          assistedPrefetch: jest.fn().mockReturnValue({
+            foo: { defer: true, data: () => 'prefetchedFoo' },
+            bar: () => 'prefetchedBar'
+          }),
+          component: { load: jest.fn() }
+        },
+        params: { foo: 'bar', baz: 'qux' },
+        location: { pathname: 'matchedLocationAssistedPrefetch' }
+      }
+      const preparedMatch = prepareMatch(match, false, true)
+
+      expect(match.route.assistedPrefetch).toHaveBeenCalledTimes(1)
+      expect(match.route.assistedPrefetch).toHaveBeenCalledWith(match.params)
+      expect(match.route.component.load).toHaveBeenCalledTimes(1)
+      expect(match.route.component.load).toHaveBeenCalledWith()
+
+      expect(preparedMatch).toEqual({
+        component: match.route.component,
+        location: match.location,
+        params: match.params,
+        assistedPrefetch: true,
         prefetched: new Map([
           [
             'foo',
@@ -1299,6 +1417,7 @@ describe('utils', () => {
         component: match.route.component,
         location: match.location,
         params: match.params,
+        assistedPrefetch: true,
         prefetched: new Map([
           [
             'foo',
@@ -1352,6 +1471,7 @@ describe('utils', () => {
         component: { load: expect.any(Function) },
         location: match.location,
         params: { baz: 'qux', foo: 'bar' },
+        assistedPrefetch: true,
         prefetched: new Map([
           [
             'foo',

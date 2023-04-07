@@ -256,6 +256,7 @@ export const matchRoutes = (
  */
 const prepareAssistPrefetchMatch = (
   { route, params, location },
+  prefetchToAssist,
   awaitPrefetch
 ) => {
   // Check if requested match is same as last match. This is important because cached match holds
@@ -268,7 +269,7 @@ const prepareAssistPrefetchMatch = (
   }
 
   const prefetched = new Map()
-  const prefetch = route.prefetch(params)
+  const prefetch = prefetchToAssist(params)
 
   // for ... in loop is faster than Object.keys + map
   for (const property in prefetch) {
@@ -311,13 +312,15 @@ const prepareAssistPrefetchMatch = (
  */
 export const prepareMatch = (match, assistPrefetch, awaitPrefetch) => {
   const { route, params, location } = match
-  const prefetched =
-    route.prefetch &&
-    (assistPrefetch
-      ? prepareAssistPrefetchMatch(match, awaitPrefetch)
-      : route.prefetch(params))
+  const prefetchToAssist =
+    (assistPrefetch && route.prefetch) || route.assistedPrefetch
 
-  if (assistPrefetch && prefetched === lastPreparedMatch.value) {
+  const prefetched = prefetchToAssist
+    ? prepareAssistPrefetchMatch(match, prefetchToAssist, awaitPrefetch)
+    : route.prefetch?.(params)
+  const assistedPrefetch = Boolean(prefetchToAssist && prefetched)
+
+  if (assistedPrefetch && prefetched === lastPreparedMatch.value) {
     // prepareAssistPrefetchMatch will return cached lastPreparedMatch if same as current match.
     // Strict equalty comparison is safe and straightforward since it would be the same reference.
     // Probably not an elegant solution to check the returned value but it allow avoiding code duplication.
@@ -332,11 +335,12 @@ export const prepareMatch = (match, assistPrefetch, awaitPrefetch) => {
     location,
     component: route.component,
     params,
-    prefetched
+    prefetched,
+    assistedPrefetch
   }
 
   // cache computed preapredMatch value so we can reuse resources
-  if (assistPrefetch && prefetched) lastPreparedMatch.value = preparedMatch
+  if (assistedPrefetch) lastPreparedMatch.value = preparedMatch
 
   return preparedMatch
 }

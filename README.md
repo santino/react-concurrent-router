@@ -417,7 +417,7 @@ const routes = [
         path: '/issue/:number',
         component: () => import('./pages/Issue'),
         prefetch: params => ({
-          issue: () => fetch(`http://.../issues/${params.number}`)// holds rendering until resolved
+          issue: () => fetch(`http://.../issues/${params.number}`) // holds rendering until resolved
         })
       }
     ]
@@ -432,6 +432,53 @@ const router = createBrowserRouter({
 
 export default router
 ```
+In a similar way to what we've seen above, you can also granularly configure to transform your fetch requests into "Suspendable" resources per route.  
+This is useful in cases where you are using a data fetching library that integrates with React Suspense for most of your application, hence you want to set `assistPrefetch` to `false`; but you might also have some routes that need to fetch data from a different source via a fetch mechanism that you control and is not covered by the fetching library you are using for most of your App.  
+For instance if you have a GraphQL application that broadly uses Relay as a data fetching library, but you also have some routes that need to fetch static content f.i. from a REST endpoint via a custom fetch function; you will want to leverage the React Suspense integration offered by RCR.  
+Here comes the snippet.
+```js
+// src/router.js
+import { preloadQuery } from 'react-relay/hooks'
+import createBrowserRouter from 'react-concurrent-router/createBrowserRouter'
+
+const routes = [
+  {
+    path: '/',
+    component: () => import('./pages/Home'),
+    prefetch: () => {
+      const HomeQuery = require('./pages/__generated__/HomeQuery.graphql')
+      return {
+        homeQuery: preloadQuery( // this prefetch entity is using Relay for data fetching
+          relayEnvironment,
+          HomeQuery,
+          {
+            owner: 'facebook',
+            name: 'create-react-app'
+          },
+          { fetchPolicy: 'store-or-network' }
+        )
+      }
+    },
+    children: [
+      {
+        path: '/termsOfUse',
+        component: () => import('./pages/StaticContent'),
+        assistedPrefetch: () => ({ // on this route we set a prefetch entity that requires `assistPrefetch`
+          issue: () => fetch(`http://.../issues/${params.number}`)
+        })
+      }
+    ]
+  }
+]
+
+const router = createBrowserRouter({
+  routes,
+  assistPrefetch: false, // You can omit this. Here it is shown to explicitly tell RCR to not transform prefetch entities into "Suspendable" resources
+})
+
+export default router
+```
+As we can see in the example above, we can tell the router to **not** "assist" prefetch globally, but to do so only on some specific routes that define `assistedPrefetch` property instead of `prefetch`. The signature and beahviour for `assistedPrefetch` is exactly the same as the `prefetch` property.
 
 Hopefully, this illustrates the power of the router when it comes to data prefetching, as well as the full customisation opportunity, should you need it.
 
