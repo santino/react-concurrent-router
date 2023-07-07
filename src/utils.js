@@ -255,7 +255,7 @@ export const matchRoutes = (
  * when advancing from a pre route warmup to the actual navigation action.
  */
 const prepareAssistPrefetchMatch = (
-  { route, params, location },
+  { params, location },
   prefetchToAssist,
   awaitPrefetch
 ) => {

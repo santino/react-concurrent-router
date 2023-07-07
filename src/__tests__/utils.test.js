@@ -1222,7 +1222,7 @@ describe('utils', () => {
         location: match.location,
         params: match.params,
         prefetched: undefined,
-        assistedPrefetch: false,
+        assistedPrefetch: false
       })
     })
 

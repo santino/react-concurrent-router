@@ -93,8 +93,9 @@ const RouteRenderer = ({ pendingIndicator }) => {
     <>
       {isPendingEntry && pendingIndicator ? pendingIndicator : null}
       <Component
-        prefetched={routeEntry.prefetched}
+        key={window.location.href} // force component remount when location changes
         params={routeEntry.params}
+        prefetched={routeEntry.prefetched}
       />
     </>
   )
