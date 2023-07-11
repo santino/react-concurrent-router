@@ -30,22 +30,30 @@ const createRouter = ({
   history.listen(({ location }) => {
     if (locationsMatch(currentEntry.location, location, true)) return // still on the same route
 
-    const skipRender = location.state && location.state.skipRender
     const match = matchRoutes(routesMap, location)
+    // skip render is meant to be for current navigation action only and must not affect future backward/forward navigation
+    const { skipRender, ...locationState } = location.state || {}
+    const useLocation = {
+      ...match.location,
+      state: Object.keys(locationState).length ? locationState : null
+    }
+    const locationHasMatch = locationsMatch(useLocation, location, true)
     const nextEntry = skipRender
       ? {
           ...currentEntry,
-          location: match.location,
+          location: useLocation,
           params: match.params,
           skipRender: true
         }
       : prepareMatch(match, assistPrefetch, awaitPrefetch)
 
-    if (!locationsMatch(match.location, location, true)) {
-      // requested route had redirectRules that have been applied, hence
+    if (skipRender || !locationHasMatch) {
+      // When skipping render we need to override history entry to not break directional navigation (forward/backward). OR
+      // Requested route had redirectRules that have been applied, hence
       // the actual destination is not the requested location; update history
-      return history.replace(match.location)
+      history.replace(useLocation)
     }
+    if (!locationHasMatch) return // if redirectRules are aplied we don't notify subscribers
 
     currentEntry = nextEntry
     subscribers.forEach(callback => callback(nextEntry))
