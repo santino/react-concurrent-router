@@ -282,7 +282,7 @@ describe('createRouter', () => {
       )
       expect(locationsMatch).toHaveBeenNthCalledWith(
         3,
-        { pathname: 'matchedLocation', state: null },
+        { pathname: 'matchedLocation' },
         { pathname: 'newLocation' },
         true
       )
@@ -321,8 +321,7 @@ describe('createRouter', () => {
       expect(prepareMatch).toHaveBeenCalledTimes(2)
       expect(defaultProps.history.replace).toHaveBeenCalledTimes(1)
       expect(defaultProps.history.replace).toHaveBeenCalledWith({
-        pathname: 'matchedLocation',
-        state: null
+        pathname: 'matchedLocation'
       })
       expect(mockSubscribeCallback).not.toHaveBeenCalled()
     })
@@ -380,8 +379,7 @@ describe('createRouter', () => {
       }
       const matchedRoute = {
         pathname: 'newLocation',
-        params: { foo: 'bar' },
-        state: null
+        params: { foo: 'bar' }
       }
       const router = createRouter(defaultProps)
       const mockSubscribeCallback = jest.fn()
@@ -410,8 +408,7 @@ describe('createRouter', () => {
         skipRenderLocation
       )
       expect(prepareMatch).toHaveBeenCalledTimes(1)
-      expect(defaultProps.history.replace).toHaveBeenCalledTimes(1)
-      expect(defaultProps.history.replace).toHaveBeenCalledWith(matchedRoute)
+      expect(defaultProps.history.replace).not.toHaveBeenCalled()
       expect(mockSubscribeCallback).toHaveBeenCalledTimes(1)
       expect(mockSubscribeCallback).toHaveBeenCalledWith({
         component: mockComponent,

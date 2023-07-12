@@ -9,8 +9,8 @@ const createRouter = ({
   assistPrefetch = false,
   awaitComponent = false,
   awaitPrefetch = false,
-  routes,
-  history
+  history,
+  routes
 }) => {
   const routesMap = routesToMap(routes)
   const entryMatch = matchRoutes(routesMap, history.location)
@@ -27,33 +27,26 @@ const createRouter = ({
 
   // Listen for location changes, match route entry, prepare the entry and notify subscribers.
   // This pattern ensures that loading (js|data) occurs outside of, and before, rendering.
-  history.listen(({ location }) => {
+  history.listen(({ location, action }) => {
     if (locationsMatch(currentEntry.location, location, true)) return // still on the same route
 
+    // skip render must not affect directional (backward/forward) navigation
+    const skipRender = location.state && location.state.skipRender && action !== 'POP'
     const match = matchRoutes(routesMap, location)
-    // skip render is meant to be for current navigation action only and must not affect future backward/forward navigation
-    const { skipRender, ...locationState } = location.state || {}
-    const useLocation = {
-      ...match.location,
-      state: Object.keys(locationState).length ? locationState : null
-    }
-    const locationHasMatch = locationsMatch(useLocation, location, true)
     const nextEntry = skipRender
       ? {
           ...currentEntry,
-          location: useLocation,
+          location: match.location,
           params: match.params,
-          skipRender: true
+          skipRender
         }
       : prepareMatch(match, assistPrefetch, awaitPrefetch)
 
-    if (skipRender || !locationHasMatch) {
-      // When skipping render we need to override history entry to not break directional navigation (forward/backward). OR
-      // Requested route had redirectRules that have been applied, hence
+    if (!locationsMatch(match.location, location, true)) {
+      // requested route had redirectRules that have been applied, hence
       // the actual destination is not the requested location; update history
-      history.replace(useLocation)
+      return history.replace(match.location)
     }
-    if (!locationHasMatch) return // if redirectRules are aplied we don't notify subscribers
 
     currentEntry = nextEntry
     subscribers.forEach(callback => callback(nextEntry))
