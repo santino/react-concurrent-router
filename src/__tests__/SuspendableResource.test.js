@@ -146,6 +146,23 @@ describe('SuspendableResource', () => {
     })
   })
 
+  describe('isLoaded', () => {
+    it('returns false when _result is not available', () => {
+      const resource = new SuspendableResource(mockLoader)
+
+      expect(resource._result).toBe(null)
+      expect(resource.isLoaded()).toBe(false)
+    })
+
+    it('returns true when _result is available', () => {
+      const resource = new SuspendableResource(mockLoader)
+      resource._result = 'mockResult'
+
+      expect(resource._result).toBe('mockResult')
+      expect(resource.isLoaded()).toBe(true)
+    })
+  })
+
   describe('read', () => {
     it('initialises load if that has not been done before (no _promise)', () => {
       const resource = new SuspendableResource(mockLoader)

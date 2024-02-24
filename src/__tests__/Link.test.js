@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import '@testing-library/jest-dom/extend-expect'
+import '@testing-library/jest-dom/jest-globals'
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react'
 
@@ -233,7 +233,7 @@ describe('Link', () => {
       expect(router.warmRoute).not.toHaveBeenCalled()
       const link = wrap().getByRole('link')
       fireEvent.keyDown(link, { key: ' ', code: 'Space' })
-      fireEvent.keyDown(link, { key: 'Shft', code: 'ShiftLeft' })
+      fireEvent.keyDown(link, { key: 'Shift', code: 'ShiftLeft' })
       fireEvent.keyDown(link, { key: 'a', code: 'KeyA' })
       fireEvent.keyDown(link, { key: '1', code: 'Digit1' })
 

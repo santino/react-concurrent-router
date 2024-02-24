@@ -2,9 +2,9 @@
  * @jest-environment jsdom
  */
 
-import '@testing-library/jest-dom/extend-expect'
+import '@testing-library/jest-dom/jest-globals'
 import React, { Suspense } from 'react'
-import { act, render } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 
 import SuspendableResource from '../SuspendableResource'
 import RouterContext from '../RouterContext'
@@ -65,11 +65,13 @@ const newRouteEntry = {
 const wrap = (routerProps = {}) =>
   render(
     <RouterContext.Provider value={{ ...mockRouter, ...routerProps }}>
-      <Suspense fallback={'Suspense fallback...'}>
+      <Suspense fallback='Suspense fallback...'>
         <RouteRenderer pendingIndicator={<PendingIndicator />} />
       </Suspense>
     </RouterContext.Provider>
   )
+
+jest.useFakeTimers()
 
 describe('RouteRenderer', () => {
   beforeEach(() => {
@@ -77,23 +79,22 @@ describe('RouteRenderer', () => {
   })
 
   it('Renders correctly initial component returned by router get', () => {
-    const { getByTestId } = wrap()
+    wrap() // render
 
     expect(mockRouterGet).toHaveBeenCalledTimes(1)
     expect(initialEntry.component.read).toHaveBeenCalledTimes(1)
     expect(mockRouterSubscribe).toHaveBeenCalledTimes(1)
 
-    expect(getByTestId('routeEntry')).toHaveTextContent('Initial')
-    expect(getByTestId('prefetchedProp')).toHaveTextContent('{"foo":"bar"}')
-    expect(getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Initial')
+    expect(screen.getByTestId('prefetchedProp')).toHaveTextContent(
+      '{"foo":"bar"}'
+    )
+    expect(screen.getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
   })
 
   it('Maps correctly initial entry "prefetched" props in assist-prefetch mode', () => {
-    const { getByTestId } = wrap({
-      assistPrefetch: true,
-      get: () => assistPrefetchInitialEntry
-    })
-    expect(getByTestId('prefetchedProp')).toHaveTextContent(
+    wrap({ assistPrefetch: true, get: () => assistPrefetchInitialEntry })
+    expect(screen.getByTestId('prefetchedProp')).toHaveTextContent(
       '{"testData":{"garply":"waldo"}}'
     )
   })
@@ -107,32 +108,35 @@ describe('RouteRenderer', () => {
           }, 500)
         })
     )
-    const { queryByText } = wrap({
-      get: () => ({ component: componentResource })
+    wrap({ get: () => ({ component: componentResource }) }) // render
+
+    expect(screen.queryByText('Suspense fallback...')).toBeInTheDocument()
+    expect(screen.queryByText('My Component')).not.toBeInTheDocument()
+
+    await act(() => {
+      jest.advanceTimersByTime(520)
     })
-
-    expect(queryByText('Suspense fallback...')).not.toBe(null)
-    expect(queryByText('My Component')).toBe(null)
-
-    await setTimeout(() => {
-      expect(queryByText('Suspense fallback...')).toBe(null)
-      expect(queryByText('My Component')).not.toBe(null)
-    }, 520)
+    expect(screen.queryByText('Suspense fallback...')).not.toBeInTheDocument()
+    expect(screen.queryByText('My Component')).toBeInTheDocument()
   })
 
   it('Immediately renders component returned by router subscription, when available', async () => {
-    const { getByTestId, queryByText } = wrap()
-    expect(getByTestId('routeEntry')).toHaveTextContent('Initial')
+    wrap() // render
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Initial')
 
     // mock subscription notification
     await act(() => {
       mockRouterSubscribe.mock.calls[0][0](newRouteEntry)
     })
 
-    expect(queryByText('Pending indicator...')).toBe(null)
-    expect(getByTestId('routeEntry')).toHaveTextContent('Subscribed')
-    expect(getByTestId('prefetchedProp')).toHaveTextContent('{"quux":"quuz"}')
-    expect(getByTestId('paramsProp')).toHaveTextContent('{"corge":"grault"}')
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument()
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Subscribed')
+    expect(screen.getByTestId('prefetchedProp')).toHaveTextContent(
+      '{"quux":"quuz"}'
+    )
+    expect(screen.getByTestId('paramsProp')).toHaveTextContent(
+      '{"corge":"grault"}'
+    )
   })
 
   it('Maps correctly "prefetched" props on component returned by subscription, in assist-prefetch mode', async () => {
@@ -149,19 +153,16 @@ describe('RouteRenderer', () => {
         ]
       ])
     }
-    const { getByTestId } = wrap({
-      assistPrefetch: true,
-      get: () => assistPrefetchInitialEntry
-    })
-    expect(getByTestId('routeEntry')).toHaveTextContent('Initial')
+    wrap({ assistPrefetch: true, get: () => assistPrefetchInitialEntry }) // render
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Initial')
 
     // mock subscription notification
     await act(async () => {
       mockRouterSubscribe.mock.calls[0][0](customNewEntry)
     })
 
-    expect(getByTestId('routeEntry')).toHaveTextContent('Subscribed')
-    expect(getByTestId('prefetchedProp')).toHaveTextContent(
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Subscribed')
+    expect(screen.getByTestId('prefetchedProp')).toHaveTextContent(
       '{"testData":{"garply":"waldo"}}'
     )
   })
@@ -174,7 +175,7 @@ describe('RouteRenderer', () => {
     expect(mockRouterDispose).toHaveBeenCalledTimes(1)
   })
 
-  it('Displays <PendingIndicator /> alongside current entry whilst waiting for new entry to resolve; in awaitComponent mode', async () => {
+  it('Displays <PendingIndicator /> alongside current entry whilst waiting for new entry to resolve component; in awaitComponent mode', async () => {
     const newComponentResource = new SuspendableResource(
       () =>
         new Promise(resolve => {
@@ -184,33 +185,36 @@ describe('RouteRenderer', () => {
         })
     )
 
-    const { getByTestId, queryByText, queryByTestId } = wrap({
-      awaitComponent: true
-    })
+    wrap({ awaitComponent: true, get: () => initialEntry }) // render
 
-    expect(getByTestId('routeEntry')).toHaveTextContent('Initial')
-    expect(getByTestId('prefetchedProp')).toHaveTextContent('{"foo":"bar"}')
-    expect(getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
-    expect(queryByText('Pending indicator...')).toBe(null)
-    expect(queryByText('My Component')).toBe(null)
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Initial')
+    expect(screen.getByTestId('prefetchedProp')).toHaveTextContent(
+      '{"foo":"bar"}'
+    )
+    expect(screen.getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument()
+    expect(screen.queryByText('My Component')).not.toBeInTheDocument()
 
     // mock subscription notification
     await act(() => {
       mockRouterSubscribe.mock.calls[0][0]({ component: newComponentResource })
     })
 
-    expect(getByTestId('routeEntry')).toHaveTextContent('Initial')
-    expect(getByTestId('prefetchedProp')).toHaveTextContent('{"foo":"bar"}')
-    expect(getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
-    expect(queryByText('Pending indicator...')).not.toBe(null)
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Initial')
+    expect(screen.getByTestId('prefetchedProp')).toHaveTextContent(
+      '{"foo":"bar"}'
+    )
+    expect(screen.getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
+    expect(screen.queryByText('Pending indicator...')).toBeInTheDocument()
 
-    await setTimeout(() => {
-      expect(queryByText('My Component')).not.toBe(null)
-      expect(queryByTestId('routeEntry')).toBe(null)
-      expect(queryByTestId('prefetchedProp')).toBe(null)
-      expect(queryByTestId('paramsProp')).toBe(null)
-      expect(queryByText('Pending indicator...')).toBe(null)
-    }, 520)
+    await act(() => {
+      jest.advanceTimersByTime(520)
+    })
+    expect(screen.queryByText('My Component')).toBeInTheDocument()
+    expect(screen.queryByTestId('routeEntry')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('prefetchedProp')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('paramsProp')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument()
   })
 
   it('Waits for non-deferrable prefetch property on new entry, in assist-prefetch mode', async () => {
@@ -247,47 +251,45 @@ describe('RouteRenderer', () => {
       ])
     }
 
-    const { getByTestId, queryByTestId, queryByText } = wrap({
-      assistPrefetch: true,
-      get: () => assistPrefetchInitialEntry
-    })
+    wrap({ assistPrefetch: true, get: () => assistPrefetchInitialEntry }) // render
 
-    expect(getByTestId('routeEntry')).toHaveTextContent('Initial')
-    expect(getByTestId('prefetchedProp')).toHaveTextContent(
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Initial')
+    expect(screen.getByTestId('prefetchedProp')).toHaveTextContent(
       '{"testData":{"garply":"waldo"}}'
     )
-    expect(getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
-    expect(queryByText('Pending indicator...')).toBe(null)
+    expect(screen.getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument()
 
     // mock subscription notification
     await act(() => {
       mockRouterSubscribe.mock.calls[0][0](newEntry)
     })
 
-    expect(getByTestId('routeEntry')).toHaveTextContent('Initial')
-    expect(getByTestId('prefetchedProp')).toHaveTextContent(
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Initial')
+    expect(screen.getByTestId('prefetchedProp')).toHaveTextContent(
       '{"testData":{"garply":"waldo"}}'
     )
-    expect(getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
-    expect(queryByText('Pending indicator...')).not.toBe(null)
+    expect(screen.getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
+    expect(screen.queryByText('Pending indicator...')).toBeInTheDocument()
 
-    await setTimeout(() => {
-      expect(queryByText('Pending indicator...')).toBe(null)
-      expect(getByTestId('routeEntry')).toHaveTextContent('Subscribed')
-      expect(getByTestId('prefetchedTestData')).toHaveTextContent(
-        '{"garply":"waldo"}'
-      )
-      expect(queryByTestId('prefetchedProp')).toBe(null)
-      expect(queryByTestId('paramsProp')).toBe(null)
-      expect(queryByText('Pending indicator...')).toBe(null)
-    }, 320)
+    await act(() => {
+      jest.advanceTimersByTime(320)
+    })
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument()
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Subscribed')
+    expect(screen.getByTestId('prefetchedTestData')).toHaveTextContent(
+      '{"garply":"waldo"}'
+    )
+    expect(screen.queryByTestId('prefetchedProp')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('paramsProp')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument()
   })
 
   it('Waits only for non-deferrable prefetch property on new entry, in assist-prefetch mode', async () => {
     const newEntry = {
       component: {
         read: jest.fn().mockImplementation(() => ({ prefetched }) => {
-          const nonDeferrableData = prefetched.nonDeferrableData.read()
+          const nonDeferrableData = prefetched.nonDeferrableData?.read()
           const deferrableData = prefetched.deferrableData.read()
           return (
             <>
@@ -332,60 +334,199 @@ describe('RouteRenderer', () => {
       ])
     }
 
-    const { getByTestId, queryByTestId, queryByText } = wrap({
-      assistPrefetch: true,
-      get: () => assistPrefetchInitialEntry
-    })
+    wrap({ assistPrefetch: true, get: () => assistPrefetchInitialEntry }) // render
 
-    expect(getByTestId('routeEntry')).toHaveTextContent('Initial')
-    expect(getByTestId('prefetchedProp')).toHaveTextContent(
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Initial')
+    expect(screen.getByTestId('prefetchedProp')).toHaveTextContent(
       '{"testData":{"garply":"waldo"}}'
     )
-    expect(getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
-    expect(queryByText('Pending indicator...')).toBe(null)
+    expect(screen.getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument(
+      null
+    )
 
     // mock subscription notification
     await act(() => {
       mockRouterSubscribe.mock.calls[0][0](newEntry)
     })
 
-    expect(queryByText('Pending indicator...')).not.toBe(null)
-    expect(getByTestId('routeEntry')).toHaveTextContent('Initial')
-    expect(queryByTestId('prefetchedTestData')).toBe(null)
+    expect(screen.queryByText('Pending indicator...')).toBeInTheDocument()
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Initial')
+    expect(screen.queryByTestId('prefetchedTestData')).not.toBeInTheDocument(
+      null
+    )
 
     // since we have been waiting for the faster request only we will fallback
     // to Suspense boundary once that completes and whilst the second request is resolved
-    await setTimeout(() => {
-      expect(queryByText('Pending indicator...')).toBe(null)
-      expect(queryByTestId('routeEntry')).toBe(null)
-      expect(queryByTestId('prefetchedProp')).toBe(null)
-      expect(queryByTestId('paramsProp')).toBe(null)
-      expect(queryByTestId('prefetchedTestData')).toBe(null)
-    }, 320)
 
-    await setTimeout(() => {
-      expect(queryByText('Suspense fallback...')).toBe(null)
-      expect(queryByText('Pending indicator...')).toBe(null)
-      expect(getByTestId('prefetchedTestData')).toHaveTextContent(
-        '{"garply":"waldo","fred":"plugh"}'
-      )
-    }, 520)
+    await act(() => {
+      jest.advanceTimersByTime(320)
+    })
+    expect(screen.queryByText('Suspense fallback...')).toBeVisible()
+    expect(screen.queryByText('Pending indicator...')).not.toBeVisible()
+    expect(screen.queryByTestId('routeEntry')).not.toBeVisible()
+    expect(screen.queryByTestId('prefetchedProp')).not.toBeVisible()
+    expect(screen.queryByTestId('paramsProp')).not.toBeVisible()
+    expect(screen.queryByTestId('prefetchedTestData')).not.toBeInTheDocument()
+
+    await act(() => {
+      jest.advanceTimersByTime(520)
+    })
+    expect(screen.queryByText('Suspense fallback...')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument()
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Subscribed')
+    expect(screen.getByTestId('prefetchedTestData')).toHaveTextContent(
+      '{"garply":"waldo","fred":"plugh"}'
+    )
+  })
+
+  it('Does not displays <PendingIndicator /> nor "await" when new component to resolve is loaded; in awaitComponent mode', async () => {
+    const newComponentResource = new SuspendableResource(
+      () =>
+        new Promise(resolve => {
+          setTimeout(() => {
+            resolve(() => <div>Component to be loaded</div>)
+          }, 500)
+        })
+    )
+    newComponentResource._result = () => <div>Component loaded</div> // force isLoaded to return true
+
+    wrap({ awaitComponent: true }) // render
+
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Initial')
+    expect(screen.getByTestId('prefetchedProp')).toHaveTextContent(
+      '{"foo":"bar"}'
+    )
+    expect(screen.getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument()
+    expect(screen.queryByText('My Component')).not.toBeInTheDocument()
+
+    // mock subscription notification
+    await act(async () => {
+      mockRouterSubscribe.mock.calls[0][0]({ component: newComponentResource })
+    })
+
+    expect(newComponentResource.isLoaded()).toBe(true)
+    expect(screen.queryByText('Component to be loaded')).toBe(null)
+    expect(screen.queryByText('Component loaded')).not.toBe(null)
+    expect(screen.queryByTestId('routeEntry')).toBe(null)
+    expect(screen.queryByTestId('prefetchedProp')).toBe(null)
+    expect(screen.queryByTestId('paramsProp')).toBe(null)
+    expect(screen.queryByText('Pending indicator...')).toBe(null)
+
+    await act(() => {
+      jest.advanceTimersByTime(520)
+    })
+    expect(screen.queryByText('Component to be loaded')).not.toBeInTheDocument()
+    expect(screen.queryByText('Component loaded')).toBeInTheDocument()
+    expect(screen.queryByTestId('routeEntry')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('prefetchedProp')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('paramsProp')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument()
+  })
+
+  it('Does not displays <PendingIndicator /> nor "await" when new component and its fetch entities to resolve is loaded; in awaitComponent mode', async () => {
+    const nonDeferrableResource = new SuspendableResource(
+      () =>
+        new Promise(resolve => {
+          setTimeout(() => {
+            resolve({ garply: 'waldo' })
+          }, 300)
+        })
+    )
+    nonDeferrableResource.isLoaded = () => true
+    const newEntry = {
+      component: {
+        read: jest.fn().mockImplementation(() => ({ prefetched }) => {
+          const nonDeferrableData = prefetched.nonDeferrableData.read()
+          const deferrableData = prefetched.deferrableData.read()
+          return (
+            <>
+              <span data-testid='routeEntry'>Subscribed</span>
+              <span data-testid='prefetchedTestData'>
+                {JSON.stringify({ ...nonDeferrableData, ...deferrableData })}
+              </span>
+            </>
+          )
+        })
+      },
+      assistedPrefetch: true,
+      prefetched: new Map([
+        [
+          'nonDeferrableData',
+          {
+            defer: false,
+            data: nonDeferrableResource
+          }
+        ],
+        [
+          'deferrableData',
+          {
+            defer: true,
+            data: new SuspendableResource(
+              () =>
+                new Promise(resolve => {
+                  setTimeout(() => {
+                    resolve({ fred: 'plugh' })
+                  }, 500)
+                })
+            )
+          }
+        ]
+      ])
+    }
+
+    wrap({ assistPrefetch: true, get: () => assistPrefetchInitialEntry }) // render
+
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Initial')
+    expect(screen.getByTestId('prefetchedProp')).toHaveTextContent(
+      '{"testData":{"garply":"waldo"}}'
+    )
+    expect(screen.getByTestId('paramsProp')).toHaveTextContent('{"baz":"qux"}')
+    expect(nonDeferrableResource.isLoaded()).toBe(true)
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument()
+
+    // mock subscription notification
+    await act(() => {
+      mockRouterSubscribe.mock.calls[0][0](newEntry)
+    })
+
+    await act(() => {
+      jest.advanceTimersByTime(320)
+    })
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument()
+    expect(screen.queryByText('Suspense fallback...')).toBeInTheDocument()
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Initial')
+    expect(screen.queryByTestId('prefetchedTestData')).not.toBeInTheDocument()
+
+    await act(() => {
+      jest.advanceTimersByTime(520)
+    })
+    expect(screen.queryByText('Suspense fallback...')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument()
+    expect(screen.getByTestId('prefetchedTestData')).toHaveTextContent(
+      '{"garply":"waldo","fred":"plugh"}'
+    )
   })
 
   it('does not re-render when "skipRender" is true', async () => {
     const mockComponentRead = jest.fn()
-    const { getByTestId, queryByText } = wrap()
-    expect(getByTestId('routeEntry')).toHaveTextContent('Initial')
+    wrap() // render
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Initial')
 
     // mock subscription notification
     await act(() => {
       mockRouterSubscribe.mock.calls[0][0](newRouteEntry)
     })
 
-    expect(queryByText('Pending indicator...')).toBe(null)
-    expect(getByTestId('routeEntry')).toHaveTextContent('Subscribed')
-    expect(getByTestId('prefetchedProp')).toHaveTextContent('{"quux":"quuz"}')
-    expect(getByTestId('paramsProp')).toHaveTextContent('{"corge":"grault"}')
+    expect(screen.queryByText('Pending indicator...')).toBe(null)
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Subscribed')
+    expect(screen.getByTestId('prefetchedProp')).toHaveTextContent(
+      '{"quux":"quuz"}'
+    )
+    expect(screen.getByTestId('paramsProp')).toHaveTextContent(
+      '{"corge":"grault"}'
+    )
 
     await act(() => {
       mockRouterSubscribe.mock.calls[0][0]({
@@ -398,10 +539,14 @@ describe('RouteRenderer', () => {
       })
     })
 
-    expect(queryByText('Pending indicator...')).toBe(null)
-    expect(getByTestId('routeEntry')).toHaveTextContent('Subscribed')
-    expect(getByTestId('prefetchedProp')).toHaveTextContent('{"quux":"quuz"}')
-    expect(getByTestId('paramsProp')).toHaveTextContent('{"corge":"grault"}')
+    expect(screen.queryByText('Pending indicator...')).not.toBeInTheDocument()
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Subscribed')
+    expect(screen.getByTestId('prefetchedProp')).toHaveTextContent(
+      '{"quux":"quuz"}'
+    )
+    expect(screen.getByTestId('paramsProp')).toHaveTextContent(
+      '{"corge":"grault"}'
+    )
     expect(mockComponentRead).not.toHaveBeenCalled()
   })
 })

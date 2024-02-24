@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import '@testing-library/jest-dom/extend-expect'
+import '@testing-library/jest-dom/jest-globals'
 import React, { useContext } from 'react'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 

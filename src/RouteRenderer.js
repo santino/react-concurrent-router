@@ -43,20 +43,23 @@ const RouteRenderer = ({ pendingIndicator }) => {
   // This is they key part that ensures we 'suspend' rendering until component.read() is able to resolve
   const Component = useMemo(() => routeEntry.component.read(), [routeEntry])
 
-  // This function is invoked in assist-prefetch mode when receiving a new route entry. It will check
-  // the fetch entities within the route prefetch object and 'await' the ones that cannot be deferred.
-  // Eventually it will then set the new route entry and composed prefetched object.
-  // NOTE: this is similar to 'computeInitialEntry' above but we cannot converge the two because here
-  // we need async/await that won't work above since initial setState value cannot be a promise.
-  const computePendingEntry = useCallback(async pendingEntry => {
-    const prefetched = {}
-
-    for (const [property, value] of pendingEntry.prefetched.entries()) {
-      if (!value.defer) await value.data.load()
-      prefetched[property] = value.data
+  // This function is invoked to process prefetched entities in assist-prefetch mode. It will split
+  // the fetch entities within the route prefetch object that need to be "await"ed from the ones that don't.
+  const processFetchEntities = useCallback(pendingEntry => {
+    if (!pendingEntry.assistedPrefetch) {
+      return { prefetched: pendingEntry.prefetched, toBePrefetched: [] }
     }
 
-    return { ...pendingEntry, prefetched }
+    const prefetched = {}
+    const toBePrefetched = []
+
+    for (const [property, value] of pendingEntry.prefetched.entries()) {
+      if (value.defer === false && value.data.isLoaded() === false) {
+        toBePrefetched.push({ key: property, data: value.data })
+      } else prefetched[property] = value.data
+    }
+
+    return { prefetched, toBePrefetched }
   }, [])
 
   // On mount subscribe for route changes
@@ -64,7 +67,15 @@ const RouteRenderer = ({ pendingIndicator }) => {
     const dispose = subscribe(async nextEntry => {
       if (nextEntry.skipRender) return
 
-      setIsPendingEntry(true)
+      const { prefetched, toBePrefetched } = processFetchEntities(nextEntry)
+      // Updating pending indicator changes state, which causes a rerender of an entire page component tree. Avoid if not necessary
+      const shouldUpdatePendingIndicator = Boolean(
+        pendingIndicator &&
+          ((awaitComponent && !nextEntry.component.isLoaded()) ||
+            (nextEntry.assistedPrefetch && toBePrefetched.length))
+      )
+
+      if (shouldUpdatePendingIndicator) setIsPendingEntry(true)
 
       // In case of awaitComponent we want to keep user on existing route until the new component
       // code has been loaded. Obviously in this case we wouldn't fallback to the Suspense boundary.
@@ -75,19 +86,34 @@ const RouteRenderer = ({ pendingIndicator }) => {
       // request as well as code chunks requests have already been initialised and are in progress.
       if (awaitComponent) await nextEntry.component.load()
 
-      // In assist-prefetch mode we need to compute the prefetch entities to check if we can/cannot
-      // defer them. When we can't defer prefetch entities we will continue to show the current
-      // route entry whilst we wait for a response; otherwise we render the new route immediately and
-      // let the component deal with loading states while prefetching.
-      const routeEntry = nextEntry.assistedPrefetch
-        ? await computePendingEntry(nextEntry)
-        : nextEntry
+      // In assist-prefetch mode we need to "await" the prefetch entities that cannot be deferred.
+      // When encountering these, we continue to show the current route entry whilst we "await".
+      // Otherwise we render the new route immediately and let the component deal with loading states while prefetching.
+      const newlyPrefetched = toBePrefetched.length
+        ? await toBePrefetched.reduce(
+            async (newlyPrefetched, { key, data }) => {
+              await data.load() // wait for prefetch entity to resolve
+              return { ...newlyPrefetched, [key]: data }
+            },
+            {}
+          )
+        : {}
+      const routeEntry = {
+        ...nextEntry,
+        prefetched: { ...prefetched, ...newlyPrefetched }
+      }
 
       setRouteEntry(routeEntry)
-      setIsPendingEntry(false)
+      if (shouldUpdatePendingIndicator) setIsPendingEntry(false)
     })
     return () => dispose() // cleanup/unsubscribe function
-  }, [assistPrefetch, awaitComponent, computePendingEntry, subscribe])
+  }, [
+    assistPrefetch,
+    awaitComponent,
+    processFetchEntities,
+    pendingIndicator,
+    subscribe
+  ])
 
   return (
     <>

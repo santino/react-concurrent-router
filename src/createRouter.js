@@ -31,7 +31,8 @@ const createRouter = ({
     if (locationsMatch(currentEntry.location, location, true)) return // still on the same route
 
     // skip render must not affect directional (backward/forward) navigation
-    const skipRender = location.state && location.state.skipRender && action !== 'POP'
+    const skipRender =
+      location.state && location.state.skipRender && action !== 'POP'
     const match = matchRoutes(routesMap, location)
     const nextEntry = skipRender
       ? {

@@ -28,6 +28,7 @@ class SuspendableResource {
         // if a js module has default export, we return that
         const returnValue = this._isModule ? result.default || result : result
         this._result = returnValue
+        return this._result
       })
       .catch(error => {
         this._error = error
@@ -35,6 +36,9 @@ class SuspendableResource {
 
     return this._promise
   }
+
+  // tells if the component has already been loaded; hence is available
+  isLoaded = () => Boolean(this._result)
 
   /**
    * This is the key method for integrating with React Suspense. Read will:
