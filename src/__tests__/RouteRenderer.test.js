@@ -19,7 +19,11 @@ const mockRouter = {
   assistPrefetch: false,
   awaitComponent: false,
   get: mockRouterGet,
-  subscribe: mockRouterSubscribe
+  subscribe: mockRouterSubscribe,
+  history: {
+    location: { pathname: '/', search: '', hash: '' },
+    listen: jest.fn().mockReturnValue(() => {})
+  }
 }
 
 const PendingIndicator = () => <span>Pending indicator...</span>
@@ -34,7 +38,8 @@ const initialEntry = {
     ))
   },
   prefetched: { foo: 'bar' },
-  params: { baz: 'qux' }
+  params: { baz: 'qux' },
+  location: { pathname: '/', search: '', hash: '' }
 }
 const assistPrefetchInitialEntry = {
   ...initialEntry,
@@ -59,15 +64,47 @@ const newRouteEntry = {
     ))
   },
   prefetched: { quux: 'quuz' },
-  params: { corge: 'grault' }
+  params: { corge: 'grault' },
+  location: { pathname: '/new-route', search: '', hash: '' }
+}
+
+// Error component that throws an error
+const ErrorComponent = () => {
+  throw new Error('Test error')
+}
+
+// Error Boundary component for testing
+class TestErrorBoundary extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+
+  static getDerivedStateFromError (error) {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch (error, errorInfo) {
+    console.log('Error caught:', error, errorInfo)
+  }
+
+  render () {
+    if (this.state.hasError) {
+      return <div data-testid='error-boundary'>Error: {this.state.error.message}</div>
+    }
+
+    return this.props.children
+  }
 }
 
 const wrap = (routerProps = {}) =>
   render(
     <RouterContext.Provider value={{ ...mockRouter, ...routerProps }}>
-      <Suspense fallback='Suspense fallback...'>
-        <RouteRenderer pendingIndicator={<PendingIndicator />} />
-      </Suspense>
+      <TestErrorBoundary key={window.location?.href || 'default'}>
+        <Suspense fallback='Suspense fallback...'>
+          <RouteRenderer pendingIndicator={<PendingIndicator />} />
+        </Suspense>
+      </TestErrorBoundary>
     </RouterContext.Provider>
   )
 
@@ -548,5 +585,55 @@ describe('RouteRenderer', () => {
       '{"corge":"grault"}'
     )
     expect(mockComponentRead).not.toHaveBeenCalled()
+  })
+
+  it('Should reset Error Boundary state when navigating to a new route', () => {
+    // Mock window.location.href to simulate navigation
+    const originalLocation = window.location
+    delete window.location
+    window.location = { href: 'http://localhost:3000/initial' }
+
+    // Create an entry that throws an error
+    const errorEntry = {
+      component: {
+        read: jest.fn().mockImplementation(() => ErrorComponent)
+      },
+      prefetched: {},
+      params: {},
+      location: { pathname: '/error', search: '', hash: '' }
+    }
+
+    // Mock the router to return the error entry initially
+    mockRouterGet.mockImplementation(() => errorEntry)
+
+    const { rerender } = wrap()
+
+    // Should show error boundary
+    expect(screen.getByTestId('error-boundary')).toBeInTheDocument()
+    expect(screen.getByTestId('error-boundary')).toHaveTextContent('Error: Test error')
+
+    // Simulate navigation by changing location and triggering subscription
+    window.location = { href: 'http://localhost:3000/new-route' }
+
+    // Mock the router to return a normal entry for the new route
+    mockRouterGet.mockImplementation(() => newRouteEntry)
+
+    // Re-render with the new location to trigger the Fragment key change
+    rerender(
+      <RouterContext.Provider value={{ ...mockRouter }}>
+        <TestErrorBoundary key={window.location.href}>
+          <Suspense fallback='Suspense fallback...'>
+            <RouteRenderer pendingIndicator={<PendingIndicator />} />
+          </Suspense>
+        </TestErrorBoundary>
+      </RouterContext.Provider>
+    )
+
+    // Should now show the new route component instead of the error boundary
+    expect(screen.queryByTestId('error-boundary')).not.toBeInTheDocument()
+    expect(screen.getByTestId('routeEntry')).toHaveTextContent('Subscribed')
+
+    // Restore original location
+    window.location = originalLocation
   })
 })

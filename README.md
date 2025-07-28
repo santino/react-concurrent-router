@@ -36,12 +36,21 @@ Performant routing embracing React [Concurrent UI patterns](https://it.reactjs.o
 ## Overview
 React Concurrent Router is a lightweight router for React applications with a main focus on performance and user experience.
 
+### Key Features
+- ⚡ **Concurrent Preloading**: Code and data prefetching before navigation
+- 🎯 **Render-as-You-Fetch**: No blocking renders during navigation
+- 🔄 **Suspense Integration**: Native React Suspense support
+- 📦 **Tree Shaking**: Optimized bundle with code splitting
+- 🛡️ **Error Boundaries**: Built-in error handling
+- ♿ **Accessibility**: Full keyboard navigation support
+- 🚀 **Performance**: <5kb gzipped, O(1) route matching
+
 The main concept this router delivers is concurrent requests of code preloading and data prefetching, even before the user actually commits the navigation action to a new route.  
 Best of all worlds: this router gives you the power of Concurrent patterns without requiring the adoption of [experimental React Concurrent Mode](https://it.reactjs.org/docs/concurrent-mode-intro.html).
 
-When your users want to perform navigation, the built-in router Link component will initialise **code preloading** when `mouseover-ing` the desired route link; considering this event a weaker signal that the user "may" navigate to a different route. This will instruct the browser to load the js chunks corresponding to the page components required by the route the user might navigate to.  
+When your users want to perform navigation, the built-in router Link component will initialize **code preloading** when `mouseover-ing` the desired route link; considering this event a weaker signal that the user "may" navigate to a different route. This will instruct the browser to load the js chunks corresponding to the page components required by the route the user might navigate to.  
 Eventually, the user will click on the Link, committing his intention to navigate to a new route, at which stage the Link will dispatch the **data prefetch** network requests you coupled with the route.  
-Both code preload and data prefetch are actually initialised even before the user commits the navigation action; respectively on `mouseover` and `mousedown` events; given the latest is already a strong signal that the user "will likely" complete the navigation. The resulting prefetched data will be passed to your page component through props defined by you.  
+Both code preload and data prefetch are actually initialized even before the user commits the navigation action; respectively on `mouseover` and `mousedown` events; given the latest is already a strong signal that the user "will likely" complete the navigation. The resulting prefetched data will be passed to your page component through props defined by you.  
 **Kicking off component (code) and data fetching before rendering is the crucial aspect that allows _Render-as-You-Fetch_ approach**.  
 In a standard React application you would start fetching the code only after the navigation action has been committed, this would cause React to break the rendering cycle (_blocking rendering_). Moving further you would start your data fetching only after the component has been mounted, meaning you have an extra delay requesting data until a component starts rendering.  
 RCR, instead, kicks off the fetching before the rendering cycle is triggered. In this case, when the rendering cycle finally starts, your application will look for resources that, if not fully fetched already, are at least in progress, hence allowing your react application/components to "Suspend" until fetching eventually completes.
@@ -54,10 +63,10 @@ Those are not the only features addressing keyboard navigation, in fact, combine
 There is a lot to share in terms of the performance tricks built into this router, so I'm planning to build more detailed documentation. In the meantime here are some bullet points:
 - Route js chunks are cached so they can be hot-retrieved and not cause multiple loading; which would otherwise be a concern when using Webpack dynamic imports asynchronous API
 - Differently from other popular routers, the routes are flattened to allow direct matches with an O(1) complexity (when not using named params) rather than iterating through all the routes available to perform a match; hence O(n)
-- Routes are defined as an array of objects **only**. This is because I consider using React components to define routes inappropriate, given that routes are simple config objects that have no reason to go through the life and rendering cycles of React components which are meant to work with DOM nodes. An important part of the philosophy for this library is that performance comes before cosmetic embellishments. You might not know that when using a `<Route>` component from other routing libraries they most likely need to use React Children API underhood to iterate through your routes and compute their props in order to end up with an array of objects anyway. Dealing with this task requires extra computation during initialisation, which impacts resources of your users' machine and delays the router setup until the whole React library is loaded; not to mention the extra code required, hence impact on bundle size too
+- Routes are defined as an array of objects **only**. This is because I consider using React components to define routes inappropriate, given that routes are simple config objects that have no reason to go through the life and rendering cycles of React components which are meant to work with DOM nodes. An important part of the philosophy for this library is that performance comes before cosmetic embellishments. You might not know that when using a `<Route>` component from other routing libraries they most likely need to use React Children API underhood to iterate through your routes and compute their props in order to end up with an array of objects anyway. Dealing with this task requires extra computation during initialization, which impacts resources of your users' machine and delays the router setup until the whole React library is loaded; not to mention the extra code required, hence impact on bundle size too
 - [Map Objects](https://developer.mozilla.org/it/docs/Web/JavaScript/Reference/Global_Objects/Map) are used extensively by the router since they provide much better performance compared to standard javascript arrays
-- The library output is optimised for bullet-proof tree-shaking so you can always be sure that you will be importing only the bits you actually use. RCR won't just rely on your Webpack setup, because it comes already code-splitted
-- The overall bundle size is less than 5kb gzipped. Realistically when combined with tree-shaking and code splitting in your application, you will generate optimised chunks with the bits you need, where you need them; reducing the actual footprint impact even further
+- The library output is optimized for bullet-proof tree-shaking so you can always be sure that you will be importing only the bits you actually use. RCR won't just rely on your Webpack setup, because it comes already code-splitted
+- The overall bundle size is less than 5kb gzipped. Realistically when combined with tree-shaking and code splitting in your application, you will generate optimized chunks with the bits you need, where you need them; reducing the actual footprint impact even further
 - The router only requires a single dependency: the `history` package
 
 ## Example applications
@@ -66,12 +75,44 @@ One demonstrates the power of RCR used with Rest APIs where the router performs 
 The other one demonstrates integration with [Relay experimental](https://relay.dev/docs/en/experimental/api-reference) using a GraphQL API; the router integrates code preloading with React Suspense and concurrently triggers code preloading and data prefetching; but leaves data fetching control, including integration with React Suspense, to Relay.
 
 ## Installation
-React Concurrent Router requires React v16.8+ since it fully embraces the React Hooks ecosystem.
+React Concurrent Router requires React v16.8+ since it fully embraces the React Hooks ecosystem. It also supports React 19. Node.js 20+ is required.
 
 ```sh
 npm install react-concurrent-router
 # or
 yarn add react-concurrent-router
+```
+
+## Quick Start
+```js
+// 1. Create your router
+import createBrowserRouter from 'react-concurrent-router/createBrowserRouter'
+
+const routes = [
+  {
+    path: '/',
+    component: () => import('./pages/Home'),
+    children: [
+      { path: 'about', component: () => import('./pages/About') },
+      { path: '*', component: () => import('./pages/NotFound') }
+    ]
+  }
+]
+
+const router = createBrowserRouter({ routes })
+
+// 2. Set up your app
+import React, { Suspense } from 'react'
+import RouterProvider from 'react-concurrent-router/RouterProvider'
+import RouteRenderer from 'react-concurrent-router/RouteRenderer'
+
+const App = () => (
+  <RouterProvider router={router}>
+    <Suspense fallback={<div>Loading...</div>}>
+      <RouteRenderer />
+    </Suspense>
+  </RouterProvider>
+)
 ```
 
 ## Configuration
@@ -168,9 +209,9 @@ Let's share some extra detail about these router config properties:
 - `awaitComponent`: a boolean with default value `false`. When set to true it will tell the router to keep rendering the current route and hold new route rendering until code preloading for the latest is complete; more info on the [Suspense boundaries alternative paragraph](#suspense-boundaries-alternative)
 - `assistPrefetch`: a boolean with default value `false`. When set to true it will let the router transform prefetch requests into "Suspendable" resources; more info on the [data prefetching paragraph](#data-prefetching)
 - `awaitPrefetch`: a boolean with default value `false`. When set to true it will tell the router to keep rendering the current route and hold new route rendering until data prefetch for the latest is complete; more info on the [Suspense boundaries alternative paragraph](#suspense-boundaries-alternative)
-- `window`: this is the only property accepted for both, the Browser and Hash router. `window` defaults to the [defaultView of the current document](https://developer.mozilla.org/en-US/docs/Web/API/Document/defaultView). However, you might want to customise this when using the router on a window that doesn't correspond to the one of the main document; an iFrame is probably the perfect example
+- `window`: this is the only property accepted for both, the Browser and Hash router. `window` defaults to the [defaultView of the current document](https://developer.mozilla.org/en-US/docs/Web/API/Document/defaultView). However, you might want to customize this when using the router on a window that doesn't correspond to the one of the main document; an iFrame is probably the perfect example
 - `initialEntries`: available only on Memory Router; defaults to `['/']`. This is an array of locations in the history stack, similar to what you would have when you've been navigating through a few pages in your application. The values in the array could be a plain string path or a [location object](https://developer.mozilla.org/en-US/docs/Web/API/Location)
-- `initialIndex`: available only on Memory Router; defaults to the index of the last item in `initialEntries`. The value must be a number that represents the index of the location you want to set as current in the history stack. Normally when navigating through pages in your application you add entries on the history stack and the last entry is always the only currently active; hence the default value. However, when navigating backward or forward you keep the entries in the stack but change the index; this property can help simulate this behaviour
+- `initialIndex`: available only on Memory Router; defaults to the index of the last item in `initialEntries`. The value must be a number that represents the index of the location you want to set as current in the history stack. Normally when navigating through pages in your application you add entries on the history stack and the last entry is always the only currently active; hence the default value. However, when navigating backward or forward you keep the entries in the stack but change the index; this property can help simulate this behavior
 
 ## Routes configuration
 ```js
@@ -197,7 +238,7 @@ If you believe that having a plain object of deeply nested routes could become h
 A route object supports the following properties:
 - `path`: a string that sets the URL path under which the route will be matched and rendered. Children routes will inherit their parents' path as a prefix
 - `component`: a function that returns a promise to dynamically load your page component. The `import()` syntax is the best way to achieve this and it also conforms to the [ECMAScript proposal for dynamic imports](https://github.com/tc39/proposal-dynamic-import). This is the recommended approach by Webpack for code splitting and allows creating chunks of your page components that RCR will preload when "mouseovering" a link, and so before a navigation action is actually committed. Underhood RCR will create a Resource instance for all your components so that it can control preloading, avoid multiple loading, and cache the resolved value for blazing fast navigation
-- `prefetch`: a function that returns an object in which keys are prefetch entities. Requests are initialised concurrently to reduce waiting times and allow components to "suspend". More info is available on the dedicated [Data prefetching paragraph](#data-prefetching).
+- `prefetch`: a function that returns an object in which keys are prefetch entities. Requests are initialized concurrently to reduce waiting times and allow components to "suspend". More info is available on the dedicated [Data prefetching paragraph](#data-prefetching).
 - `redirectRules`: a function where you can perform logic to determine whether or not you might want to redirect your users to a different route. The return value should be negative, best to use `null`, when you don't want to perform any redirect; or a string representing the path you want to redirect to. More info is available on the dedicated [Redirect rules paragraph](#redirect-rules).
 
 Something that is probably not obvious is that technically all the properties can be optional.  
@@ -248,7 +289,7 @@ Just so you know, `awaitComponent` and `awaitPrefetch` are `false` by default an
 Let's start with `awaitComponent`; when navigating to a new route we always need to load the code for the components in order to render the new page. If `awaitComponent` is not set to true, RCR will signal that the component should "Suspend", since the code is not yet available, and your upper Suspense boundary will catch this signal and render the defined fallback. The point is that most likely a fallback defined above the router won't have any meaningful content and so even if you might have some nice loading animation it won't necessarily provide the best experience to your users whilst they wait for the new code to be loaded.  
 When you set `awaitComponent` to `true`, instead, the router will intercept the navigation request and will not attempt to immediately render the new component; hence the signal to be caught by the upper Suspense boundary won't be sent. This means that we continue to render the previous page until the new component is loaded and able to be rendered without causing any "Suspension"; this also has the benefit of reducing re-renderings and painting jobs on the browser.
 
-Similar to the above, `awaitPrefetch`, will allow the router to intercept pending requests for your prefetch entities and continue to keep the current page on the screen until these requests complete. In this case, RCR will apply this behaviour by default to all the prefetch entities you have defined with your routes; however, you still have the opportunity to granularly control and override this on single entities if you wish; you can read more in the [data prefetching paragraph](#data-prefetching) below.  
+Similar to the above, `awaitPrefetch`, will allow the router to intercept pending requests for your prefetch entities and continue to keep the current page on the screen until these requests complete. In this case, RCR will apply this behavior by default to all the prefetch entities you have defined with your routes; however, you still have the opportunity to granularly control and override this on single entities if you wish; you can read more in the [data prefetching paragraph](#data-prefetching) below.  
 Note: `awaitPrefetch` is only available when you are in full control of your fetching mechanism and you let RCR deal with Suspense integration for prefetching requests. This is achieved when not using a third party data fetching library and so when opting into `assistPrefetch` mode; again this is discussed deeper in the [data prefetching paragraph](#data-prefetching) below.
 
 Finally, the last piece that pulls this all together is the `pendingIndicator`. This is a component you create to signal the user that we're processing their navigation action. You pass this component as a prop to `<RouteRenderer />`; it is not mandatory but certainly highly advisable since we are keeping the user on the current page and so we should provide visual feedback that their request to navigate to a new route is in progress. A popular pattern is to display a loading bar at the top of the page.  
@@ -966,12 +1007,18 @@ const Home = ({ prefetched }) => {
 ```
 
 ## Roadmap
-- Typescript support
+- TypeScript support
 - Allow config for permanent redirects
 
 #### Open to discussion
 - Implementation of withRouter HOC
 - Partial matching, as an addition to exact matches
+
+## Contributing
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## Code of Conduct
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md) to keep our community approachable and respectable.
 
 ## License
 MIT License  

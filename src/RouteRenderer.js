@@ -1,4 +1,5 @@
 import React, {
+  Fragment,
   useCallback,
   useContext,
   useEffect,
@@ -115,15 +116,21 @@ const RouteRenderer = ({ pendingIndicator }) => {
     subscribe
   ])
 
+  // Create a unique key based on the route location to force remounting when navigation occurs
+  // This ensures that any Error Boundary state is reset on navigation
+  const locationKey = routeEntry.location 
+    ? routeEntry.location.pathname + routeEntry.location.search + routeEntry.location.hash
+    : 'default'
+
   return (
-    <>
+    <Fragment key={locationKey}>
       {isPendingEntry && pendingIndicator ? pendingIndicator : null}
       <Component
         key={window.location.href} // force component remount when location changes
         params={routeEntry.params}
         prefetched={routeEntry.prefetched}
       />
-    </>
+    </Fragment>
   )
 }
 

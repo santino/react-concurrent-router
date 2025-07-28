@@ -1,9 +1,11 @@
 import babel from '@rollup/plugin-babel'
 import commonjs from '@rollup/plugin-commonjs'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
-import { terser } from 'rollup-plugin-terser'
+import terser from '@rollup/plugin-terser'
 import compiler from '@ampproject/rollup-plugin-closure-compiler'
-import pkg from './package.json'
+import { readFileSync } from 'fs'
+
+const pkg = JSON.parse(readFileSync('./package.json', 'utf8'))
 
 const configBase = {
   input: {
